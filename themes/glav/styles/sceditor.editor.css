@@ -1,0 +1,88 @@
+html, body, p, code:before, table {
+    font-family: Arial, Verdana, Helvetica, sans-serif;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+}
+html {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+body {
+    min-height: 100%;
+    overflow: auto;
+    position: relative;
+    word-wrap: break-word;
+}
+ul, ol {
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-bottom: 0;
+    padding-top: 0;
+}
+table, td {
+    border: 1px dotted #000;
+    empty-cells: show;
+}
+code:before {
+    content: 'Код:';
+    left: 0;
+    position: absolute;
+    top: -1.35em;
+}
+code {
+    background: #eee;
+    border: 1px solid #aaa;
+    display: block;
+    font-family: 'Courier New', 'Courier';
+    margin-top: 1.5em;
+    padding: .25em;
+    position: relative;
+    white-space: pre;
+}
+.ie6 code, .ie7 code {
+    margin-top: 0;
+}
+code:before, code {
+    display: block;
+    text-align: left;
+}
+img {
+    vertical-align: middle;
+}
+div {
+    min-height: 1.25em;
+}
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+.quote {
+    background: #ddd url(/images/bg_quote16.gif) no-repeat 5px 3px;
+    border-left: 2px solid #666;
+    margin: .25em 0;
+    padding: 5px 10px 5px 30px;
+    position: relative;
+}
+.quote .quoteHeader {
+    color: #666;
+    display: block;
+    font-style: normal;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.spoiler {
+    background-color: #ddd;
+    border: 1px dotted #000;
+    border-left: 2px solid #666;
+    margin: .25em 0;
+    padding: 5px 10px 5px 10px;
+    position: relative;
+}
+.spoiler .spoilerHeader {
+    background-color: #ddd;
+    color: #666;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
