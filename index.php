@@ -3,7 +3,7 @@
 <head>
 <title>Глобальная Авантюра</title>
 <meta name="viewport" content="width=device-width" />
-<link href="themes/glav/styles/sceditor.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="https://glav.su/themes/glav/flex.css?t=1485603030" media="screen" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="jquery.class.js"></script>
 <script type="text/javascript" src="jquery.sceditor.bbcode.js.source"></script>
@@ -20,7 +20,6 @@ $(document).ready(function()
     {
         var bbCode = $('#messageBBCodeForm textarea').sceditor('instance').getWysiwygEditorValue();
         $.post('ajax.php', {'bbCode': bbCode}, function(result) {
-                alert(result.html);
             $('#jsPHPHtml').html(result.html);
         }, 'json');
     });
@@ -37,7 +36,7 @@ $(document).ready(function()
          <input id="jsParseButton" type="button" value="Parse" />
     </td>
     <td style="vertical-align: top;">
-        <div id="jsPHPHtml"></div>
+        <div id="jsPHPHtml" style="padding: 10px;"></div>
     </td>
 </tr>
 </table>
