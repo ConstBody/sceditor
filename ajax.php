@@ -1,5 +1,6 @@
 <?php
 
+require_once 'GetSmileys.php';
 require_once 'ParseBBCode.php';
 
 $bbCode = $_POST['bbCode'];

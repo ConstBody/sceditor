@@ -1168,11 +1168,7 @@ class Forum_Api_ParseBBCode
      */
     protected function _parseSmileys($text)
     {
-        return $text;
-
-        $application = Zend_Registry::get('application');
-
-        $theme = $application->getOption('theme');
+        $theme = 'glav';
 
         // получаем новые смайлы
         $getSmileysService = new Forum_Service_GetSmileys();
