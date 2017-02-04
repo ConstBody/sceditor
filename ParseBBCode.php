@@ -1168,6 +1168,8 @@ class Forum_Api_ParseBBCode
      */
     protected function _parseSmileys($text)
     {
+        return $text;
+
         $application = Zend_Registry::get('application');
 
         $theme = $application->getOption('theme');

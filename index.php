@@ -16,12 +16,30 @@
 $(document).ready(function()
 {
     new Forum.MessageForm();
+    $('#jsParseButton').click(function()
+    {
+        var bbCode = $('#messageBBCodeForm textarea').sceditor('instance').getWysiwygEditorValue();
+        $.post('ajax.php', {'bbCode': bbCode}, function(result) {
+                alert(result.html);
+            $('#jsPHPHtml').html(result.html);
+        }, 'json');
+    });
 });
 </script>
 </head>
 <body>
-<div id="messageBBCodeForm" class="bbCodeForm">
-<textarea id="messageFormContentFieldWidget" name="content" style="height: 360px; display: none;"></textarea>
-</div>
+<table>
+<tr>
+    <td style="vertical-align: top; width: 50%;">
+        <div id="messageBBCodeForm" class="bbCodeForm">
+            <textarea id="messageFormContentFieldWidget" name="content" style="height: 360px; display: none;"></textarea>
+        </div>
+         <input id="jsParseButton" type="button" value="Parse" />
+    </td>
+    <td style="vertical-align: top;">
+        <div id="jsPHPHtml"></div>
+    </td>
+</tr>
+</table>
 </body>
 </html>
