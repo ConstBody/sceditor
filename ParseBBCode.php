@@ -233,7 +233,7 @@ class Forum_Api_ParseBBCode
                 'before' => '<li>',
                 'after' => '</li>',
                 'trim' => 'outside',
-                'require_parents' => array('list'),
+                'require_parents' => array('list', 'ul', 'ol'),
                 'isBlock' => true,
                 'disabled_before' => '',
                 'disabled_after' => '<br />'
@@ -326,6 +326,17 @@ class Forum_Api_ParseBBCode
                 'tag' => 'nobbc',
                 'type' => self::TYPE_UNPARSED_CONTENT,
                 'content' => '$1'
+            )
+        ),
+        'o' => array(
+            'ol' => array(
+                'tag' => 'ol',
+                'type' => self::TYPE_PARSED_CONTENT,
+                'before' => '<ol>',
+                'after' => '</ol>',
+                'trim' => 'inside',
+                'require_children' => array('li'),
+                'isBlock' => true
             )
         ),
         'p' => array(
@@ -473,7 +484,7 @@ class Forum_Api_ParseBBCode
             'table' => array(
                 'tag' => 'table',
                 'type' => self::TYPE_PARSED_CONTENT,
-                'before' => '<table>',
+                'before' => '<table class="postTable">',
                 'after' => '</table>',
                 'trim' => 'inside',
                 'require_children' => array('tr'),
@@ -504,6 +515,15 @@ class Forum_Api_ParseBBCode
             )
         ),
         'u' => array(
+            'ul' => array(
+                'tag' => 'ul',
+                'type' => self::TYPE_PARSED_CONTENT,
+                'before' => '<ul>',
+                'after' => '</ul>',
+                'trim' => 'inside',
+                'require_children' => array('li'),
+                'isBlock' => true
+            ),
             'url1' => array(
                 'tag' => 'url',
                 'type' => self::TYPE_UNPARSED_CONTENT,

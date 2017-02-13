@@ -96,31 +96,27 @@ $(document).ready(function()
                 },
                 quoteType: $.sceditor.BBCodeParser.QuoteType.never,
                 isInline: false,
-                breakBefore: true,
-                breakAfter: true,
+                //breakBefore: true,
+                //breakAfter: true,
                 format: function(element, content) {
                     var header = '';
                     var $spoiler = $(element);
                     var $spoilerHeader = $spoiler.children('div.spoilerHeader').first();
 
                     if($spoilerHeader.length === 1 || $spoiler.data('header')) {
-			header = $spoilerHeader.text() || $spoiler.data('header');
+						header = $spoilerHeader.text() || $spoiler.data('header');
                         $spoiler.data('header', header);
                         $spoilerHeader.remove();
-                        content	= this.elementToBbcode($(element));
+                        content	= this.elementToBbcode($spoiler);
                         header  = '=' + header;
                         $spoiler.prepend($spoilerHeader);
                     }
                     return '[spoiler' + header + ']' + content + '[/spoiler]';
                 },
                 html: function(token, attrs, content) {
+                    var headerCaption = (attrs.defaultattr)? widget.escapeEntities(attrs.defaultattr) : 'Скрытый текст';
                     content = content.replace(/^<br[\s]*\/>/g, '').replace(/<br[\s]*\/>$/g, '');
-                    if (attrs.defaultattr) {
-                        content = '<div class="spoilerHeader">' + widget.escapeEntities(attrs.defaultattr) + '</div>' + content;
-                    } else {
-                        content = '<div class="spoilerHeader">Скрытый текст</div>' + content;
-                    }
-                    return '<blockquote class="spoiler">' + content + '</blockquote>';
+                    return '<blockquote class="spoiler"><div class="spoilerHeader spoilerHeaderOn" onclick="var $=window.parent.$, s=[\'spoilerHeaderOn\',\'spoilerHeaderOff\'], v=+($(this).next(\'div\').toggle().is(\':visible\')); $(this).removeClass( s[v]).addClass(s[+(!v)]);">' + headerCaption + '</div><div class="spoilerContent">' + content + '</div></blockquote>';
                 }
             });
 
@@ -141,19 +137,20 @@ $(document).ready(function()
                 },
                 isInline: false,
                 format: function(element, content) {
+                	var matches,
+                		ytReg = /^https?:\/\/www\.youtube\.com\/embed\/([a-z0-9\-\=\_]+)/i,
+                		rtReg = /^https?:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i;
                     // youtube
-                    if (/https?:\/\/www\.youtube\.com/i.test($(element).attr('src'))) {
-                        var movieId = $(element).attr('src').match(/^https?:\/\/www\.youtube\.com\/embed\/([a-z0-9\-\=\_]+)/i)[1];
-                        return '[movie=' + $(element).attr('width') + ',' + $(element).attr('height') + ']https://youtu.be/'+ movieId + '[/movie]';
+                    if( (matches = $(element).attr('src').match(ytReg)) && matches.length == 2 ){
+                        return '[movie=' + $(element).attr('width') + ',' + $(element).attr('height') + ']https://youtu.be/'+ matches[1] + '[/movie]';
                     }
                     // rutube
-                    if (/https?:\/\/rutube\.ru/i.test($(element).attr('src'))) {
-                        var movieId = $(element).attr('src').match(/^https?:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i)[1];
-                        return '[movie=' + $(element).attr('width') + ',' + $(element).attr('height') + ']https?://rutube.ru/play/embed/'+ movieId + '[/movie]';
+                    if( (matches = $(element).attr('src').match(rtReg)) && matches.length == 2 ){
+                        return '[movie=' + $(element).attr('width') + ',' + $(element).attr('height') + ']https?://rutube.ru/play/embed/'+ matches[1] + '[/movie]';
                     }
                 },
                 html: function(token, attrs, content) {
-                    var width = 400, height = 300;
+                    var width = 400, height = 300, matches;
                     if (attrs.defaultattr && /^[\d]+,[\d]+$/.test(attrs.defaultattr)) {
                         var matches = attrs.defaultattr.match(/^([\d]+),([\d]+)$/);
                         width = parseInt(matches[1]);
@@ -161,24 +158,23 @@ $(document).ready(function()
                         height = parseInt(matches[2]);
                         height = height > 600 ? 600 : height;
                     }
-                    // youtube 1
-                    if (/^https?:\/\/youtu\.be/i.test(content)) {
-                        var movieId = content.match(/^https?:\/\/youtu\.be\/([a-z0-9\-\=\_]+)/i)[1];
-                        return '<iframe class="youtube" width="' + width + '" height="' + height + '" src="https://www.youtube.com/embed/' + movieId + '?wmode=opaque" frameborder="0" allowfullscreen></iframe>';
-                    }
-                    // youtube 2
-                    if (/^https?:\/\/www\.youtube\.com\/watch\?v=/i.test(content)) {
-                        var movieId = content.match(/^https?:\/\/www\.youtube\.com\/watch\?v=([a-z0-9\-\=\_]+)/i)[1];
-                        return '<iframe class="youtube" width="' + width + '" height="' + height + '" src="https://www.youtube.com/embed/' + movieId + '?wmode=opaque" frameborder="0" allowfullscreen></iframe>';
+                    // youtube 1,2
+					$.each([/^https?:\/\/youtu\.be\/([a-z0-9\-\=\_]+)/i,
+							/^https?:\/\/www\.youtube\.com\/watch\?v=([a-z0-9\-\=\_]+)/i],
+						function(idx, reg){
+							if ( (matches = content.match(reg)) && matches.length == 2 ) return false;
+						}
+					);
+                    if ( matches.length == 2 ) {
+                        return '<iframe class="youtube" width="' + width + '" height="' + height + '" src="https://www.youtube.com/embed/' + matches[1] + '?wmode=opaque" frameborder="0" allowfullscreen></iframe>';
                     }
                     // rutube 1
-                    if (/^http:\/\/rutube\.ru\/play\/embed\//i.test(content)) {
-                        var movieId = content.match(/^http:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i)[1];
-                        return '<iframe class="rutube" width="' + width + '" height="' + height + '" src="http://rutube.ru/play/embed/' + movieId + '" frameborder="0" allowfullscreen></iframe>';
+                    if ( (matches = content.match(/^http:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i)) && matches.length == 2 ) {
+                        return '<iframe class="rutube" width="' + width + '" height="' + height + '" src="http://rutube.ru/play/embed/' + matches[1] + '" frameborder="0" allowfullscreen></iframe>';
                     }
                     // rutube 2
-                    if (/^http:\/\/rutube\.ru\/video/i.test(content)) {
-                        var hash = content.match(/^http:\/\/rutube\.ru\/video\/([a-z0-9\-\=\_]+)/i)[1];
+                    if ( (matches = content.match(/^http:\/\/rutube\.ru\/video\/([a-z0-9\-\=\_]+)/i)) && matches.length == 2 ) {
+                        var hash = matches[1];
                         var html = '';
                         $.ajax(APP_URL + '/default/ajax/loadrutubemovieinfo/', {'async': false, 'data': {'hash': hash}, dataType: 'json'}).done(function(data) {
                             if (data.status) {
@@ -211,8 +207,8 @@ $(document).ready(function()
             $.sceditor.command.set("spoiler", {
                 forceNewLineAfter: ['blockquote'],
                 exec: function() {
-                    var before = '<blockquote class="spoiler"><div class="spoilerHeader">Скрытый текст</div>';
-                    var end = '<br /></blockquote>';
+                    var before = '<blockquote class="spoiler"><div class="spoilerHeader spoilerHeaderOn" onclick="var $=window.parent.$, s=[\'spoilerHeaderOn\',\'spoilerHeaderOff\'], v=+($(this).next(\'div\').toggle().is(\':visible\')); $(this).removeClass( s[v]).addClass(s[+(!v)]);">Скрытый текст</div><div class="spoilerContent">';
+                    var end = '<br /></div></blockquote>';
                     this.wysiwygEditorInsertHtml(before, end);
                 },
                 txtExec: ["[spoiler]", "[/spoiler]"],
@@ -221,68 +217,81 @@ $(document).ready(function()
 
             // youtube command
             $.sceditor.command.set("youtube", {
-		_dropDown: function (editor, caller, action) {
-		    var content = $('<div><label for="link">URL:</label> <input type="text" id="link" value="" /></div><div><label for="width">Ширина (необязательно):</label> <input type="text" id="width" size="4" maxlength="3" value="400" /></div><div><label for="height">Высота (необязательно):</label> <input type="text" id="height" size="4" maxlength="3" value="300" /></div><div><input type="button" class="button" value="Вставить" /></div>');
-                    content.find('.button').click(function (e) {
-                        var link = content.find('#link').val().replace('http://', '').replace('https://', '');;
-                        var movieId = '';
-                        if (/^youtu\.be/i.test(link)) {
-                            movieId = link.match(/^youtu\.be\/([a-z0-9\-\=\_]+)/i)[1];
-                        } else if (/^www\.youtube\.com\/watch\?v=/i.test(link)) {
-                            movieId = link.match(/^www\.youtube\.com\/watch\?v=([a-z0-9\-\=\_]+)/i)[1];
-                        }
-                        if (!movieId) {
-                            alert('Неверный URL видео Youtube!');
-                        }
-                        var width = parseInt(content.find('#width').val());
-                        if (width <= 50 || width >= 800) {
-                            width = 400;
-                        }
-                        var height = parseInt(content.find('#height').val());
-                        if (height <= 50 || height >= 600) {
-                            height = 300;
-                        }
-                        action(movieId, width, height);
-                        editor.closeDropDown(true);
-                        e.preventDefault();
-                    });
-                    editor.createDropDown(caller, 'insertlink', content);
-                },
-		exec: function (caller) {
-		    var editor = this;
-		    $.sceditor.command.get('youtube')._dropDown(editor, caller, function(id, width, height) {
-                            var iframe='<iframe class="youtube" width="' + width + '" height="' + height + '" src="https://www.youtube.com/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
-			    editor.wysiwygEditorInsertHtml(iframe);
-			}
-		    );
-		},
+				_dropDown: function (editor, caller, action) {
+				    var content = $('<div><label for="link">URL:</label> <input type="text" id="link" value="" /></div><div><label for="width">Ширина (необязательно):</label> <input type="text" id="width" size="4" maxlength="3" value="400" /></div><div><label for="height">Высота (необязательно):</label> <input type="text" id="height" size="4" maxlength="3" value="300" /></div><div><input type="button" class="button" value="Вставить" /></div>');
+					content.find('.button').click(function (e) {
+					    var link = content.find('#link').val();
+					    var movieId = '', matches;
+						$.each([/^https?:\/\/youtu\.be\/([a-z0-9\-\=\_]+)/i,
+								/^https?:\/\/www\.youtube\.com\/watch\?v=([a-z0-9\-\=\_]+)/i],
+							function(idx, reg){
+								if ( (matches = link.match(reg)) && matches.length == 2 ){
+			                        movieId = matches[1];
+									return false;
+								}
+							}
+						);
+					    if (movieId === '') {
+					        alert('Неверный URL видео Youtube!');
+						    e.preventDefault();
+						    content.find('#link').focus();
+					        return;
+					    }
+					    var width = parseInt(content.find('#width').val());
+					    if (width <= 50 || width >= 800) {
+					        width = 400;
+					    }
+					    var height = parseInt(content.find('#height').val());
+					    if (height <= 50 || height >= 600) {
+					        height = 300;
+					    }
+					    action(movieId, width, height);
+					    editor.closeDropDown(true);
+					    e.preventDefault();
+					});
+					editor.createDropDown(caller, 'insertlink', content);
+				},
+				exec: function (caller) {
+				    var editor = this;
+				    $.sceditor.command.get('youtube')._dropDown(editor, caller, function(id, width, height) {
+		            	var iframe='<iframe class="youtube" width="' + width + '" height="' + height + '" src="https://www.youtube.com/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
+					    editor.wysiwygEditorInsertHtml(iframe);
+					});
+				},
                 txtExec: ["[movie]", "[/movie]"],
                 tooltip: "Видео Youtube"
             });
 
             // rutube command
             $.sceditor.command.set("rutube", {
-		_dropDown: function (editor, caller, action) {
-		    var content = $('<div><label for="link">URL:</label> <input type="text" id="link" value="" /></div><div><label for="width">Ширина (необязательно):</label> <input type="text" id="width" size="4" maxlength="3" value="400" /></div><div><label for="height">Высота (необязательно):</label> <input type="text" id="height" size="4" maxlength="3" value="300" /></div><div><input type="button" class="button" value="Вставить" /></div>');
+				_dropDown: function (editor, caller, action) {
+				    var content = $('<div><label for="link">URL:</label> <input type="text" id="link" value="" /></div><div><label for="width">Ширина (необязательно):</label> <input type="text" id="width" size="4" maxlength="3" value="400" /></div><div><label for="height">Высота (необязательно):</label> <input type="text" id="height" size="4" maxlength="3" value="300" /></div><div><input type="button" class="button" value="Вставить" /></div>');
                     content.find('.button').click(function (e) {
-                        var link = content.find('#link').val().replace('http://', '');
-                        var movieId = '';
-                        if (/^rutube\.ru\/play\/embed\//i.test(link)) {
-                            movieId = link.match(/^rutube\.ru\/play\/embed\/([0-9]+)/i)[1];
-                        } else if (/^rutube\.ru\/video/i.test(link)) {
-                            var hash = link.match(/^rutube\.ru\/video\/([a-z0-9\-\=\_]+)/i)[1];
+                        var link = content.find('#link').val();
+                        var movieId = '', matches;
+						if ( (matches = link.match(/^http:\/\/rutube\.ru\/video\/([a-z0-9\-\=\_]+)/i)) && matches.length == 2 ) {
+                            var hash = matches[1];
+                            link = '';
                             $.ajax(APP_URL + '/default/ajax/loadrutubemovieinfo/', {'async': false, 'data': {'hash': hash}, dataType: 'json'}).done(function(data) {
                                 if (data.status) {
-                                    var url = data.data['embed_url'];
-                                    movieId = url.match(/^http:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i)[1];
+                                    link = data.data['embed_url'];
                                 }
                             });
-                            if (!movieId) {
+                            if (!link) {
                                 alert('Истек таймаут к серверу Rutube. Повторите попытку позже!');
+							    e.preventDefault();
+							    content.find('#link').focus();
+						        return;
                             }
+                        }
+                        if ( (matches = link.match(/^http:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i)) && matches.length == 2 ) {
+                            movieId = matches[1];
                         }
                         if (!movieId) {
                             alert('Неверный URL видео Rutube!');
+						    e.preventDefault();
+						    content.find('#link').focus();
+					        return;
                         }
                         var width = parseInt(content.find('#width').val());
                         if (width <= 50 || width >= 800) {
@@ -298,17 +307,21 @@ $(document).ready(function()
                     });
                     editor.createDropDown(caller, 'insertlink', content);
                 },
-		exec: function (caller) {
-		    var editor = this;
-		    $.sceditor.command.get('rutube')._dropDown(editor, caller, function(id, width, height) {
-                            var iframe='<iframe class="rutube" width="' + width + '" height="' + height + '" src="http://rutube.ru/play/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
-			    editor.wysiwygEditorInsertHtml(iframe);
-			}
-		    );
-		},
+				exec: function (caller) {
+				    var editor = this;
+				    $.sceditor.command.get('rutube')._dropDown(editor, caller, function(id, width, height) {
+		                var iframe='<iframe class="rutube" width="' + width + '" height="' + height + '" src="http://rutube.ru/play/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
+					    editor.wysiwygEditorInsertHtml(iframe);
+					});
+				},
                 txtExec: ["[movie]", "[/movie]"],
                 tooltip: "Видео Rutube"
             });
+
+            // new command
+//            $.sceditor.command.set("new", {
+
+//            });
 
             this.editor = $(this.instance).find('textarea').sceditor({
                 toolbar: 'emoticon|pastetext|bold,italic,underline,strike,superscript,subscript|left,center,right,justify|bulletlist,orderedlist|horizontalrule|quote,spoiler|link,unlink,image|youtube,rutube|table|size,color|removeformat,maximize,source',

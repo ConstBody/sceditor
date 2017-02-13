@@ -15,6 +15,9 @@ body {
     position: relative;
     word-wrap: break-word;
 }
+a, a:hover {
+	color: #036;
+}
 ul, ol {
     margin-bottom: 0;
     margin-top: 0;
@@ -24,6 +27,9 @@ ul, ol {
 table, td {
     border: 1px dotted #000;
     empty-cells: show;
+}
+td {
+	padding: 0 5px;
 }
 code:before {
     content: 'Код:';
@@ -58,10 +64,18 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
     padding: 0;
 }
+hr {
+    border-color: #ccc;
+    border-style: solid;
+    border-width: 1px;
+    border-bottom-width: 0px;
+    color: #ccc;
+    display: block;
+}
 .quote {
     background: #ddd url(/images/bg_quote16.gif) no-repeat 5px 3px;
     border-left: 2px solid #666;
-    margin: .25em 0;
+    margin: 4px 0;
     padding: 5px 10px 5px 30px;
     position: relative;
 }
@@ -74,15 +88,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 .spoiler {
     background-color: #ddd;
-    border: 1px dotted #000;
     border-left: 2px solid #666;
-    margin: .25em 0;
+    margin: 4px 0;
     padding: 5px 10px 5px 10px;
     position: relative;
 }
-.spoiler .spoilerHeader {
-    background-color: #ddd;
-    color: #666;
-    font-weight: bold;
-    margin-bottom: 5px;
+.spoilerHeader {
+    cursor: pointer;
+	padding-left: 22px;
+}
+.spoilerHeader:hover {
+	text-decoration: underline;
+}
+.spoilerHeaderOn {
+    background: transparent url(data:image/gif;base64,R0lGODlhEAAQAIAAAP///2ZmZiH5BAAAAAAALAAAAAAQABAAAAITjI+py+0Po3Sg2quuBrP7D4ZOAQA7) no-repeat 0px 0px;
+}
+.spoilerHeaderOff {
+	background: transparent url(data:image/gif;base64,R0lGODlhEAAQAIAAAP///2ZmZiH5BAAAAAAALAAAAAAQABAAAAIajI+py+0AHILy0Boug7zH5HnPV2mSOWLqihUAOw==) no-repeat 0px 0px;
+}
+.spoilerContent {
+	margin-top: 10px;
 }
