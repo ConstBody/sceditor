@@ -206,7 +206,7 @@ class Forum_Api_ParseBBCode
             'img3' => array(
                 'tag' => 'img',
                 'type' => self::TYPE_UNPARSED_PARAMETERS_UNPARSED_CONTENT,
-                'test' => '\d+,\d+\]',
+                'test' => '\d+(,|x)\d+\]',
                 'content' => '<img src="$1" alt="" width="$2" height="$3" />',
                 'disabled_content' => '($1)'
             ),
@@ -1069,7 +1069,8 @@ class Forum_Api_ParseBBCode
                     continue;
                 }
                 // We want $1 to be the content, and the rest to be csv.
-                $data = explode(',', ',' . substr($bbCode, $posStartParameters, $posEndTag - $posStartParameters));
+                //$data = explode(',', ',' . substr($bbCode, $posStartParameters, $posEndTag - $posStartParameters));
+                $data = preg_split('~(,|x)~', ',' . substr($bbCode, $posStartParameters, $posEndTag - $posStartParameters));
                 $data[0] = substr($bbCode, $posEndTag + 1, $pos3 - $posEndTag - 1);
                 if (isset($tag['validate'])) {
                     $tag['validate']($tag, $data);
