@@ -30,6 +30,19 @@ $(document).ready(function()
 
             var widget = this;
 
+            $.sceditor.plugins.bbcode.bbcode.set('font', {
+                tags: {
+                    font: null
+                },
+                isInline: false,
+                format: function(element, content) {
+                    return content;
+                },
+                html: function(token, attrs, content) {
+                    return content;
+                }
+            });
+
             // quote bbcode
             $.sceditor.plugins.bbcode.bbcode.set('quote', {
                 styles: {
@@ -325,6 +338,7 @@ $(document).ready(function()
 
             this.editor = $(this.instance).find('textarea').sceditor({
                 toolbar: 'emoticon|pastetext|bold,italic,underline,strike,superscript,subscript|left,center,right,justify|bulletlist,orderedlist|horizontalrule|quote,spoiler|link,unlink,image|youtube,rutube|table|size,color|removeformat,maximize,source',
+                toolbarExclude: 'font',
                 style: '/themes/glav/styles/sceditor.editor.css',
                 colors: 'aqua,black,blue,fuchsia|gray,green,lime,maroon|navy,olive,purple,red|silver,teal,white,yellow',
                 locale: 'ru',
@@ -407,7 +421,8 @@ $(document).ready(function()
                 },
                 enablePasteFiltering: true,
                 plugins: 'bbcode',
-                width: '100%'
+                width: '100%',
+                bbcodeTrim: true
             });
         }
     });
