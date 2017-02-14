@@ -157,7 +157,7 @@ class Forum_Api_ParseBBCode
             'font' => array(
                 'tag' => 'font',
                 'type' => self::TYPE_UNPARSED_PARAMETER,
-                'test' => '[A-Za-z0-9_,\-\s]+?\]',
+                'test' => '[A-Za-z0-9_,\-\s"]+?\]',
                 'before' => '<span style="font-family: $1;">',
                 'after' => '</span>'
             )
