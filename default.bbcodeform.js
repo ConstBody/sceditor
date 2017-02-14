@@ -204,6 +204,56 @@ $(document).ready(function()
                 }
             });
 
+            // size bbcode
+            $.sceditor.plugins.bbcode.bbcode.set('size', {
+	            tags: {
+	                'span': {
+	                    'class': ['size']
+	                }
+	            },
+	            styles: {
+	                'stylename': null
+	            },
+	            format: function(element, content) {
+	                var fontSize = parseInt(element.css('fontSize'));
+	                if (fontSize <= 1) {
+	                    fontSize = '10px';
+	                } else if (fontSize > 1 && fontSize < 7) {
+	                    fontSize = '14px';
+	                } else if (fontSize == 7) {
+	                    fontSize = '18px';
+	                } else if (fontSize > 7 && fontSize <= 11) {
+	                    fontSize = '10px';
+	                } else if (fontSize > 11 && fontSize <= 14) {
+	                    fontSize = '14px';
+	                } else if (fontSize > 14) {
+	                    fontSize = '18px';
+	                }
+	                return '[size=' + fontSize + ']' + content + '[/size]';
+	            },
+	            html: function(token, attrs, content) {
+	                var fontSize = '14px';
+	                content = content.replace(/^<br[\s]*\/>/g, '').replace(/<br[\s]*\/>$/g, '');
+	                if (attrs.defaultattr) {
+	                    fontSize = parseInt(attrs.defaultattr);
+	                    if (fontSize <= 1) {
+	                        fontSize = '10px';
+	                    } else if (fontSize > 1 && fontSize < 7) {
+	                        fontSize = '14px';
+	                    } else if (fontSize == 7) {
+	                        fontSize = '18px';
+	                    } else if (fontSize > 7 && fontSize <= 11) {
+	                        fontSize = '10px';
+	                    } else if (fontSize > 11 && fontSize <= 14) {
+	                        fontSize = '14px';
+	                    } else if (fontSize > 14) {
+	                        fontSize = '18px';
+	                    }
+	                }
+	                return '<span class="size" style="font-size: ' + fontSize + '">' + content + '</span>';
+	            }
+            });
+
             // quote command
             $.sceditor.command.set("quote", {
                 forceNewLineAfter: ['blockquote'],
@@ -331,10 +381,50 @@ $(document).ready(function()
                 tooltip: "Видео Rutube"
             });
 
-            // new command
-//            $.sceditor.command.set("new", {
+            // Size command
+            $.sceditor.command.set("size", {
+				_dropDown: function (editor, caller, callback) {
+					var	content   = $('<div />'),
+						/** @private */
+						clickFunc = function (e) {
+							callback($(this).data('size'));
+							editor.closeDropDown(true);
+							e.preventDefault();
+						};
+					var sizeTmpl = '<a class="sceditor-fontsize-option" data-size="{size}" href="#"><span style="font-size: {size}">{label}</span></a>';
+					$.each([{size: '10px', label: 'Мелкий'},
+							{size: '14px', label: 'Обычный'},
+							{size: '18px', label: 'Крупный'}],
+							function(idx, sopt){
+								var sizeopt = sizeTmpl;
+								$.each(sopt, function (name, val) {
+									sizeopt = sizeopt.replace(new RegExp('\\{' + name + '\\}', 'g'), val);
+								});
+								content.append($(sizeopt).click(clickFunc));
+							}
+					);
+//					for (var i = 1; i <= 7; i++) {
+//						content.append(_tmpl('sizeOpt', {
+//							size: i
+//						}, true).click(clickFunc));
+//					}
 
-//            });
+					editor.createDropDown(caller, 'fontsize-picker', content);
+				},
+				exec: function (caller) {
+					var editor = this;
+
+					$.sceditor.command.get('size')._dropDown(
+						editor,
+						caller,
+						function (fontSize) {
+//							editor.execCommand('fontsize', fontSize);
+	                        editor.wysiwygEditorInsertHtml('<span class="size" style="font-size: ' + fontSize + '">', '</span>');
+						}
+					);
+				},
+				tooltip: 'Font Size'
+            });
 
             this.editor = $(this.instance).find('textarea').sceditor({
                 toolbar: 'emoticon|pastetext|bold,italic,underline,strike,superscript,subscript|left,center,right,justify|bulletlist,orderedlist|horizontalrule|quote,spoiler|link,unlink,image|youtube,rutube|table|size,color|removeformat,maximize,source',
@@ -422,7 +512,8 @@ $(document).ready(function()
                 enablePasteFiltering: true,
                 plugins: 'bbcode',
                 width: '100%',
-                bbcodeTrim: true
+                bbcodeTrim: true,
+                runWithoutWysiwygSupport: true
             });
         }
     });
