@@ -633,6 +633,11 @@ class Forum_Api_ParseBBCode
         ');
         self::$_instance->_bbCodes['p']['php']['validate'] = $validatePHPFunction;
 
+        $validateFontFunction = create_function('&$tag, &$data', '
+            $data = preg_replace(\'~["\\\']~i\', \'\', $data);
+        ');
+        self::$_instance->_bbCodes['f']['font']['validate'] = $validateFontFunction;
+
         return self::$_instance;
     }
 
