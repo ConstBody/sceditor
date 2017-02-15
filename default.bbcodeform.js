@@ -30,18 +30,18 @@ $(document).ready(function()
 
             var widget = this;
 
-            $.sceditor.plugins.bbcode.bbcode.set('font', {
-                tags: {
-                    font: null
-                },
-                isInline: false,
-                format: function(element, content) {
-                    return content;
-                },
-                html: function(token, attrs, content) {
-                    return content;
-                }
-            });
+            //$.sceditor.plugins.bbcode.bbcode.set('font', {
+            //    tags: {
+            //        font: null
+            //    },
+            //    isInline: false,
+            //    format: function(element, content) {
+            //        return content;
+            //    },
+            //    html: function(token, attrs, content) {
+            //        return content;
+            //    }
+            //});
 
             // quote bbcode
             $.sceditor.plugins.bbcode.bbcode.set('quote', {

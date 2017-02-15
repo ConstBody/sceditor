@@ -1708,7 +1708,15 @@
 						'toSource', pasteddata, $(pastearea)
 					);
 				}
-
+				
+	// --------- хак
+	// Удаляем из втавляемого текста лишние bbcode
+				var removeTags = ['font', 'color', 'size'];
+				$.each(removeTags, function(idx, rtag){
+					pasteddata = pasteddata.replace(new RegExp('\\['+rtag+'.*?\\]|\\[\/'+rtag+'\\]', 'ig'), '');
+				}); 
+	// ---------
+				
 				pastearea.parentNode.removeChild(pastearea);
 
 				if (pluginManager.hasHandler('toWysiwyg')) {
