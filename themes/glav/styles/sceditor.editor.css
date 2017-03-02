@@ -109,3 +109,9 @@ hr {
 .spoilerContent {
 	margin-top: 10px;
 }
+.twitter-logo {
+	display: block;
+	width: 16px;
+	height: 16px;
+	background-image: url('/themes/glav/images/twitter-logo.png');
+}

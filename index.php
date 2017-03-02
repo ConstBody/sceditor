@@ -13,6 +13,7 @@
 <script type="text/javascript" src="default.bbcodeform.uploadimage.js"></script>
 <!--<script type="text/javascript" src="forum.messageform.bbcode.js"></script>-->
 <script type="text/javascript" src="forum.messageform.js"></script>
+<script type="text/javascript" src="twitter.widjets.js"></script>
 <script type="text/javascript">
     //<![CDATA[
     APP_URL = "http://alvig.ru/sce";
@@ -35,6 +36,7 @@ $(document).ready(function()
 			success: function(result){
 	            console.log(result);
 	            $('#postContent').empty().html(result.html);
+	            //$('#postContent').append($(result.html));
 	            init_funcs();
 			},
 			error: function(xhr, status, errstr){
@@ -53,9 +55,31 @@ var init_funcs = function(){
 			isVisible = +( $(this).next("div").toggle().is(":visible") );
 		$(this).removeClass(bc[isVisible]).addClass(bc[+(!isVisible)]);
 	});
+	
+	// Окукливание длинных цитат
+	$(".cBlockQuoteContent").each(function(idx, bqc){
+		if( bqc.scrollHeight > bqc.clientHeight ){
+			$(bqc).parent().find(".cBlockQuoteFooter")
+				.css({display: 'block'}).attr('state', "closed")
+				.click(function(){
+					if( $(this).attr('state') == "closed" ){
+						$(bqc).css({'max-height': "none"});
+						$(this).css('width', "24px").attr('state', "open");
+						$(this).find(".cBlockQuoteToggle").css('background-position', "0 -20px");
+					}else{
+						$(bqc).css('max-height', "10em");
+						$(this).css('width', "100%").attr('state', "closed");
+						$(this).find(".cBlockQuoteToggle").css('background-position', "center 8px");
+					}
+				});
+		}
+	});
+	
+	twttr.widgets.load();
 }
 </script>
 <style type="text/css">
+/*forum css*/
 ol {
 	padding-left: 20px;
 }
@@ -64,9 +88,63 @@ table.postTable td {
 }
 .cBlockQuote, cBlockSpoiler {
 	margin: 4px 0;
+	position: relative;
+}
+.cBlockQuoteContent {
+	max-height: 10em;
+	overflow: hidden;
+}
+.cBlockQuoteFooter {
+	display: none;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	height: 32px;
+	cursor: pointer;
+	text-align: center;
+	background: linear-gradient(to top, #ddd, rgba(221, 221, 221, 0.9), rgba(221, 221, 221, 0.0)) repeat scroll 0% 0% transparent;
+}
+.cBlockQuoteToggle {
+	display: block;
+	height: 100%;
+	width: 100%;
+	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAwCAYAAAACYxrZAAAACXBIWXMAAC4jAAAuIwF4pT92AAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY6xSsNQFEDPi6LiUCsEcXB4kygotupgxqQtRRCs1SHJ1qShSmkSXl7VfoSjWwcXd7/AyVFwUPwC/0Bx6uAQIYODCJ7p3MPlcsGo2HWnYZRhEGvVbjrS9Xw5+8QMUwDQCbPUbrUOAOIkjvjB5ysC4HnTrjsN/sZ8mCoNTIDtbpSFICpA/0KnGsQYMIN+qkHcAaY6addAPAClXu4vQCnI/Q0oKdfzQXwAZs/1fDDmADPIfQUwdXSpAWpJOlJnvVMtq5ZlSbubBJE8HmU6GmRyPw4TlSaqo6MukP8HwGK+2G46cq1qWXvr/DOu58vc3o8QgFh6LFpBOFTn3yqMnd/n4sZ4GQ5vYXpStN0ruNmAheuirVahvAX34y/Axk/96FpPYgAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAAAAj0lEQVR42uzWSw6AIAxF0da4z66tKy0jE6J8KmCN5nWGDE6IIVw2M4qcjYIHIECAAAHOz54vVPWRp0NEuAgS0bGxCubmCRfCXN0oPcCqev5ko5CI9MEBuAu5QAfshm6BuPgAAQIECBDgn7r09cQIi6iwTJyAmnCO1v7hbMqZN/VXN+MFRpd+H0wAAAD//wMAUNJBSc1FQBMAAAAASUVORK5CYII=') no-repeat center 8px;
+}
+.cBlockTwitter {
+	display: block;
+	height: auto;
 }
 hr {
 	margin: 7px 0;
+}
+.twitter-logo {
+	display: block;
+	width: 16px;
+	height: 16px;
+	background-image: url('/themes/glav/images/twitter-logo.png');
+}
+</style>
+
+<style type="text/css">
+/*sceditor.css*/
+.sceditor-button div {
+    background-image: url('/themes/glav/images/sceditor2017-02-26.png');
+}
+.sceditor-button-qsplit div {
+    background-position: -720px 0px;
+}
+.sceditor-button-twitter div {
+    background-position: -768px 0px;
+}
+div.sceditor-dropdown label {
+	display: inline;
+    font-weight: normal;
+    padding: 4px;
+}
+div.sceditor-dropdown .button {
+	display: block;
+	margin: auto;
 }
 </style>
 </head>
@@ -82,39 +160,12 @@ hr {
 <tr>
     <td style="vertical-align: top; width: 100%; text-align: center;">
         <div id="messageBBCodeForm" class="bbCodeForm">
-            <textarea id="messageFormContentFieldWidget" name="content" style="height: 320px; display: none;">[quote author=user link=forum/7-support/7/4268982-message/#message4268982 date=1486796541]В чащах юга жил бы цитрус? Да, но фальшивый экземпляр![/quote]
-
-[b]Жирный[/b] [i]курсив[/i] [color=fuchsia][u]подчёркнутый[/u][/color] [s]зачёркнутый[/s] X[sup]2[/sup] X[sub]abc 
-[/sub]
-Таблица
-[table][tr][td]td11[/td]
-[td]td12[/td]
-[/tr]
-[tr][td]td21[/td]
-[td]td22[/td]
-[/tr]
-[/table]
-:smiley::undecided::cheesy:
-[url=https://glav.su/forum/]https://glav.su/forum/[/url]
-[url=https://glav.su/forum/]Ссылка[/url]
-[spoiler=Скрытый текст]Спойлер
-[img]https://glav.su/themes/glav/images/headerS.jpg[/img]
-1313123 1233 2312 с[/spoiler]
-
-[center][size=6]По центру[/size][/center]
-[right]Quick brown fox jumps over the lazy dog.[/right]
-[ul]
-[li]список1[/li]
-[li]список2[/li]
-[/ul]
-
-[hr]
-[ol]
-[li]список11[/li]
-[li]список12[/li]
-[/ol]
-[hr]
-</textarea>
+            <textarea id="messageFormContentFieldWidget" name="content" style="height: 320px; display: none;">
+[twitter width=320 type=tweet hide_media=1]https://twitter.com/NASA/status/832607570107981824[/twitter]
+[twitter]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]
+[twitter width=300]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]
+[twitter width=900 type=video]https://twitter.com/NASA/status/832607570107981824[/twitter]
+           </textarea>
         </div>
         <input id="jsParseButton" type="button" value="Parse" class="cBlueButton" style="height: 26px; margin: 5px 0;" />
     </td>

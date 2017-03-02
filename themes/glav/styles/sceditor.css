@@ -40,7 +40,7 @@
     cursor: default;
 }
 .sceditor-button div {
-    background-image: url('/themes/glav/images/sceditor2014-08-19.png');
+    background-image: url('/themes/glav/images/sceditor2017-02-26.png');
     background-repeat: no-repeat;
     color: transparent;
     display: block;
@@ -149,6 +149,12 @@
 .sceditor-button-youtube div {
     background-position: -504px 0px;
 }
+.sceditor-button-qsplit div {
+    background-position: -720px 0px;
+}
+.sceditor-button-twitter div {
+    background-position: -768px 0px;
+}
 .sceditor-color-column {
     float: left;
 }
@@ -234,9 +240,8 @@ div.sceditor-dropdown form {
 }
 div.sceditor-dropdown label {
     color: #3c3c3c;
-    display: block;
-    font-weight: bold;
-    padding: 4px 0;
+	display: inline;
+    padding: 4px;
 }
 div.sceditor-dropdown input, div.sceditor-dropdown textarea {
     background-clip: padding-box;
@@ -270,7 +275,8 @@ div.sceditor-dropdown .button {
     color: #444;
     cursor: pointer;
     font-weight: bold;
-    margin: .3em 0 0;
+	display: block;
+	margin: auto;
     padding: 6px 12px;
     -moz-background-clip: padding;
     -moz-border-radius: 0px;

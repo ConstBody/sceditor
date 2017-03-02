@@ -359,7 +359,7 @@ class Forum_Api_ParseBBCode
                 'tag' => 'quote',
                 'type' => self::TYPE_PARSED_CONTENT,
                 'before' => '<div class="cBlockQuote"><div class="cBlockQuoteHeader">Цитата</div><div class="cBlockQuoteContent">',
-                'after' => '</div></div>',
+                'after' => '</div><span state="hidden" class="cBlockQuoteFooter"><span class="cBlockQuoteToggle"></span></span></div>',
                 'isBlock' => true
             ),
             'quote2' => array(
@@ -369,14 +369,14 @@ class Forum_Api_ParseBBCode
                     'author' => array('match' => '(.{1,192}?)', 'quoted' => true/*, 'validate' => 'parse_bbc'*/),
                 ),
                 'before' => '<div class="cBlockQuote"><div class="cBlockQuoteHeader">Цитата: {author}</div><div class="cBlockQuoteContent">',
-                'after' => '</div></div>',
+                'after' => '</div><span state="hidden" class="cBlockQuoteFooter"><span class="cBlockQuoteToggle"></span></span></div>',
                 'isBlock' => true
             ),
             'quote3' => array(
                 'tag' => 'quote',
                 'type' => self::TYPE_PARSED_PARAMETER,
                 'before' => '<div class="cBlockQuote"><div class="cBlockQuoteHeader">Цитата: $1</div><div class="cBlockQuoteContent">',
-                'after' => '</div></div>',
+                'after' => '</div><span state="hidden" class="cBlockQuoteFooter"><span class="cBlockQuoteToggle"></span></span></div>',
                 'quoted' => 'optional',
                 'isBlock' => true
             ),
@@ -389,7 +389,7 @@ class Forum_Api_ParseBBCode
                     'date' => array('match' => '(\d+)', 'validate' => 'date', 'validateParams' => array('d.m.Y H:i:s')),
                 ),
                 'before' => '<div class="cBlockQuote"><div class="cBlockQuoteHeader">Цитата: <a href="/{link}" rel="nofollow">{author} от {date}</a></div><div class="cBlockQuoteContent">',
-                'after' => '</div></div>',
+                'after' => '</div><span state="hidden" class="cBlockQuoteFooter"><span class="cBlockQuoteToggle"></span></span></div>',
                 'isBlock' => true
             ),
             'quote5' => array(
@@ -399,7 +399,7 @@ class Forum_Api_ParseBBCode
                     'author' => array('match' => '(.{1,192}?)'),
                 ),
                 'before' => '<div class="cBlockQuote"><div class="cBlockQuoteHeader">Цитата: {author}</div><div class="cBlockQuoteContent">',
-                'after' => '</div></div>',
+                'after' => '</div><span state="hidden" class="cBlockQuoteFooter"><span class="cBlockQuoteToggle"></span></span></div>',
                 'isBlock' => true
             )
         ),
@@ -512,7 +512,89 @@ class Forum_Api_ParseBBCode
                 'isBlock' => true,
                 'disabled_before' => '',
                 'disabled_after' => ''
-            )
+            ),
+            'twitter1' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'parameters' => array(
+                    'width' => array('match' => '(\d{3})'),
+                    'type' => array('match' => '(tweet)'),
+                    'hide_media' => array('match' => '(1)'),
+                ),
+                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="{width}" data-cards="hidden"><a href="',
+                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
+            'twitter2' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'parameters' => array(
+                    'width' => array('match' => '(\d{3})'),
+                    'type' => array('match' => '(tweet|video)'),
+                ),
+                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="{width}"><a href="',
+                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
+            'twitter3' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'parameters' => array(
+                    'width' => array('match' => '(\d{3})'),
+                ),
+                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="{width}"><a href="',
+                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
+            'twitter4' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'parameters' => array(
+                    'width' => array('match' => '(\d{3})'),
+                    'hide_media' => array('match' => '(1)'),
+                ),
+                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="{width}" data-cards="hidden"><a href="',
+                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
+            'twitter5' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'parameters' => array(
+                    'type' => array('match' => '(tweet|video)'),
+                ),
+                'before' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="500"><a href="',
+                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
+            'twitter6' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'parameters' => array(
+                    'type' => array('match' => '(tweet|video)'),
+                    'hide_media' => array('match' => '(1)'),
+                ),
+                'before' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="500" data-cards="hidden"><a href="',
+                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
+            'twitter7' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'parameters' => array(
+                    'hide_media' => array('match' => '(1)'),
+                ),
+                'before' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="500" data-cards="hidden"><a href="',
+                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
+            'twitter8' => array(
+                'tag' => 'twitter',
+                'type' => self::TYPE_UNPARSED_CONTENT,
+                'test' => '\s*(https?://twitter\.com/\w+/status/\d+)\s*\[/twitter\]',
+                'content' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="500"><a href="$1"><span class="twitter-logo"></span></a></blockquote></div>',
+                'isBlock' => true
+            ),
         ),
         'u' => array(
             'ul' => array(
