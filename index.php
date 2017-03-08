@@ -16,7 +16,7 @@
 <script type="text/javascript" src="twitter.widjets.js"></script>
 <script type="text/javascript">
     //<![CDATA[
-    APP_URL = "http://alvig.ru/sce";
+    APP_URL = "http://sce.ru";
 	CSRF_TOKEN = "0f72438b1865d6ac10f83edbfbf33cdd7ea3611b";
     //]]>
 </script>
@@ -48,6 +48,19 @@ $(document).ready(function()
 
     });
 });
+/*
+twttr.ready(function (twttr) {
+	twttr.events.bind('rendered', function (event) {
+		if (event.target.classList.contains('twitter-tweet-error')) {
+			event.target.innerHTML = event.target.innerHTML + '<br /><span class="twitter-err-message">Ошибка загрузки твита.<br />Возможно твита с таким адресом не существует.</span>';
+		}
+		if (event.target.classList.contains('twitter-video-error')) {
+			event.target.innerHTML = event.target.innerHTML + '<br /><span class="twitter-err-message">Ошибка загрузки видео из твита.<br />Возможно твит не содержит видео.</span>';
+		}
+		//console.log("Created widget", event.target);
+	});
+});
+*/
 var init_funcs = function(){
 	// спойлер
 	$(".cBlockSpoilerHeaderOff").click(function(){
@@ -115,6 +128,10 @@ table.postTable td {
 	display: block;
 	height: auto;
 }
+.twitter-err-message {
+	color: #a00000;
+}
+
 hr {
 	margin: 7px 0;
 }
@@ -131,20 +148,35 @@ hr {
 .sceditor-button div {
     background-image: url('/themes/glav/images/sceditor2017-02-26.png');
 }
-.sceditor-button-qsplit div {
+.sceditor-button-qsplit div {/**/
     background-position: -720px 0px;
 }
-.sceditor-button-twitter div {
+.sceditor-button-twitter div {/**/
     background-position: -768px 0px;
 }
-div.sceditor-dropdown label {
+.sceditor-button-video div {/**/
+    background-position: -792px 0px;
+}
+div.sceditor-dropdown label {/**/
 	display: inline;
     font-weight: normal;
     padding: 4px;
 }
-div.sceditor-dropdown .button {
+div.sceditor-dropdown .button {/**/
 	display: block;
 	margin: auto;
+}
+div.sceditor-video_wizard .video_data_block {/**/
+	display: inline-block;
+	max-width: 320px;
+	max-height: 60px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding: 5px 3px;
+	margin-bottom: 10px;
+}
+div.sceditor-video_wizard input {/**/
+	margin: 0;
 }
 </style>
 </head>
@@ -160,12 +192,7 @@ div.sceditor-dropdown .button {
 <tr>
     <td style="vertical-align: top; width: 100%; text-align: center;">
         <div id="messageBBCodeForm" class="bbCodeForm">
-            <textarea id="messageFormContentFieldWidget" name="content" style="height: 320px; display: none;">
-[twitter width=320 type=tweet hide_media=1]https://twitter.com/NASA/status/832607570107981824[/twitter]
-[twitter]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]
-[twitter width=300]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]
-[twitter width=900 type=video]https://twitter.com/NASA/status/832607570107981824[/twitter]
-           </textarea>
+            <textarea id="messageFormContentFieldWidget" name="content" style="height: 320px; display: none;"></textarea>
         </div>
         <input id="jsParseButton" type="button" value="Parse" class="cBlueButton" style="height: 26px; margin: 5px 0;" />
     </td>
@@ -317,6 +344,12 @@ div.sceditor-dropdown .button {
 </td>
 </tr>
 </table>
+<!--
+[twitter width=320 type=tweet hide_media=1]https://twitter.com/NASA/status/832607570107981824[/twitter]<br />
+[twitter]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]<br />
+[twitter width=300]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]<br />
+[twitter width=900 type=video]https://twitter.com/NASA/status/832607570107981824[/twitter]<br />
+-->
 
 </body>
 </html>

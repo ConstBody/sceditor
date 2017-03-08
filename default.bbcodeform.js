@@ -1,5 +1,7 @@
 $(document).ready(function()
 {
+	Number.prototype.dd = function(){ return (this<10)? '0'+this : this.toString(); }
+	Number.prototype.rr = function(min, max){ var ret = Math.max(min, this); return Math.min(max, ret); }
     $.Class.extend("Default.BBCodeForm",
 	    {
 	    },
@@ -141,11 +143,6 @@ $(document).ready(function()
                 tags: {
                     iframe: {
                         'class': ['youtube','rutube'],
-                        'width': null,
-                        'height': null,
-                        'src': null,
-                        'frameborder': null,
-                        'allowfullscreen': null
                     }
                 },
                 isInline: false,
@@ -153,6 +150,7 @@ $(document).ready(function()
                 	var matches,
                 		ytReg = /^https?:\/\/www\.youtube\.com\/embed\/([a-z0-9\-\=\_]+)/i,
                 		rtReg = /^https?:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i;
+                	console.log(element);
                     // youtube
                     if( (matches = $(element).attr('src').match(ytReg)) && matches.length == 2 ){
                         return '[movie=' + $(element).attr('width') + ',' + $(element).attr('height') + ']https://youtu.be/'+ matches[1] + '[/movie]';
@@ -459,6 +457,71 @@ $(document).ready(function()
 
             // Twitter command
             $.sceditor.command.set("twitter", {
+            	_checkURL: function(url, data, callback){
+            		var link, matches, tweetId = '';
+       				if( (matches = url.match(/^https?:\/\/twitter\.com\/(\w+)\/status\/(\d+)/i)) && matches.length == 3 ){
+    					link = 'https://twitter.com/' + matches[1] + '/status/' + matches[2];
+    					tweetId = matches[2];
+    					data.url = encodeURIComponent(link);
+    					if( data.widget_type == 'video' ){
+    						data.extra_info = 'true';
+    					}
+    					var api_url = APP_URL + '/twitter_api.php?';
+    					$.each(data, function(dkey, dval){
+    						api_url += api_url.match(/\?$/)? '' : '&';
+    						api_url += dkey + '=' + dval;
+    					});
+    					console.log(api_url);
+						$.ajax({
+							url: api_url,
+							type: 'GET',
+							dataType: 'json',
+							success: function(result){
+					            if( typeof result['error'] !== 'undefined' ){
+	                                callback({ error:'Ошибка при проверке твита: '+result['error']+'\n'+result['req_url'] });
+						            console.log(result);
+							        return;
+					            }else if( typeof result['tweet'] !== 'undefined' ){
+						            var tweet = JSON.parse(result.tweet);
+						            console.log(tweet);
+						            if( data.widget_type == 'video' ){
+							            console.log(result);
+						            	var vd = JSON.parse(result.player_data.replace(/&quot;/g, '"'));
+							            console.log(vd);
+							            callback({
+							            	type: 'twitter',
+							            	link: result.tweet_link,
+							            	title: '<span style="font-weight: bold;">' + vd.user.name + '.</span> ' + vd.status.text,
+							            	width: tweet.width,
+							            	height: null,
+							            	aspectRatio: 'none',
+							            	thumb: vd.image_src,
+							            	extra_info: vd,
+							            });
+						            }else{
+							            callback({
+							            	link: result.tweet_link,
+							            });
+						            }
+						            return;
+					            }else{
+	                                callback({ error:'Ошибка при проверке твита.' });
+						            console.log(result);
+							        return;
+				            	}
+					            console.log(result);
+							},
+							error: function(xhr, status, errstr){
+                                callback({ error:'Ошибка при проверке твита: ' + status + ': ' + errstr });
+								console.log(xhr);
+						        return;
+							}
+						});
+       					return 0;
+       				}else{
+				        return 1; // Not twitter url
+       				}
+            	},
 				_dropDown: function (editor, caller, action) {
                     var $content = $('<div>')
                     	.append('<label for="link">URL:</label>',
@@ -475,85 +538,49 @@ $(document).ready(function()
                     		'<label for="twitter-video">Видео</label><br />', 
                     		$('<input type="button" class="button" value="Вставить" />')
                     			.click(function(e){
-                    				var link = $link.val(), matches, tweetId = widget_type = '';
-                    				if( (matches = link.match(/^https?:\/\/twitter\.com\/(\w+)\/status\/(\d+)/i)) && matches.length == 3 ){
-                    					link = 'https://twitter.com/' + matches[1] + '/status/' + matches[2];
-                    					tweetId = matches[2];
+                    				var link = $link.val(), matches, tweetId = '', hide_media,
                     					widget_type = $("input[name=widget_type]:checked").val();
-                    					var data = {'omit_script': "true", 'lang': "ru", 'url': encodeURIComponent(link)};
-                    					//var data = {'lang': "ru", 'url': encodeURIComponent(link)};
-                    					if( widget_type == 'tweet' ){
-                    						if( $("#hide_media").prop('checked') ){
-                    							data['hide_media'] = 'true';
-                    						}
-                    					}else{
-                    						data['widget_type'] = 'video';
+//                					var data = {'omit_script': "true", 'lang': "ru", 'url': encodeURIComponent(link)};
+                					var data = {'omit_script': "true", 'lang': "ru"};
+                					if( widget_type == 'tweet' ){
+                						if( $("#hide_media").prop('checked') ){
+                							data['hide_media'] = 'true';
+                							hide_media = true;
+                						}
+                					}else{
+                						data['widget_type'] = 'video';
+                					}
+                    				$.sceditor.command.get('twitter')._checkURL( $link.val(), data, function(result){
+                    					if( typeof result.error !== 'undefined' ){
+                    						alert(result.error);
+                    						e.preventDefault();
+                    						$content.find('#link').focus();
+                    						return;
                     					}
-                    					var api_url = APP_URL + '/twitter_api.php?'
-                    					$.each(data, function(dkey, dval){
-                    						api_url += api_url.match(/\?$/)? '' : '&';
-                    						api_url += dkey + '=' + dval;
-                    					});
-                    					console.log(api_url);
-										$.ajax({
-											url: api_url,
-											type: 'GET',
-											dataType: 'json',
-											success: function(result){
-									            if( typeof result['error'] !== 'undefined' ){
-					                                alert('Ошибка при проверке твита: '+result['error']+'\n'+result['req_url']);
-												    e.preventDefault();
-												    $content.find('#link').focus();
-										            console.log(result);
-											        return;
-									            }else if( typeof result['tweet'] !== 'undefined' ){
-									            	var width = parseInt($width.val());
-									            	width = Math.max(width, 320);
-									            	width = Math.min(width, 900);
-							                        var hide_media = (widget_type == 'tweet') && $("#hide_media").prop('checked');
-							                        action(api_url+'&iframe=true&maxwidth='+width, link, widget_type, hide_media, width);
-							                        editor.closeDropDown(true);
-							                        e.preventDefault();
-									            }else{
-					                                alert('Ошибка при проверке твита');
-												    e.preventDefault();
-												    $content.find('#link').focus();
-										            console.log(result);
-											        return;
-								            	}
-									            console.log(result);
-											},
-											error: function(xhr, status, errstr){
-												gxhr = xhr;
-												console.log(xhr);
-				                                alert('Ошибка при проверке твита: ' + status + ': ' + errstr);
-											    e.preventDefault();
-											    $content.find('#link').focus();
-										        return;
-											}
-										});
-										e.preventDefault();
-                    				}else{
-		                                alert('Неверный формат URL');
-									    e.preventDefault();
-									    $content.find('#link').focus();
-								        return;
-                    				}
+						            	var width = parseInt($width.val());
+						            	width = isNaN(width)? 500 : width.rr(320, 900);
+				                        action(result.link, widget_type, hide_media, width);
+				                        editor.closeDropDown(true);
+				                        e.preventDefault();
+                    					return;
+                    				});
                     			})
                     		);
                     editor.createDropDown(caller, 'insertlink', $content);
                 },
+                forceNewLineAfter: ['div'],
 				exec: function (caller) {
 				    var editor = this;
-				    $.sceditor.command.get('twitter')._dropDown(editor, caller, function(api_url, link, widget_type, hide_media, width) {
-				    	hide_media = hide_media? ' hide_media="1"' : '';
-		                var tweet='<iframe class="twitter" width="' + width + '" src="' + api_url + '" widget_type="' + widget_type + '"' + hide_media + ' link="' + link + '" frameborder="0" allowfullscreen></iframe>';
+				    $.sceditor.command.get('twitter')._dropDown(editor, caller, function(link, widget_type, hide_media, width) {
+				    	hide_media = hide_media? ' data-cards="hidden"' : '';
+				    	var tweet = '<div contentEditable="false" class="twitter-div" style="width: ' + width + 'px;" widget_type="' + widget_type + '"' + hide_media + ' link="' + link + '" data-width="' + width + '"><blockquote class="twitter-' + widget_type + '" data-lang="ru" data-width="' + width + '"' + hide_media + '><a href="' + link + '"><span class="twitter-logo"></span></a></blockquote></div><br />';
 					    editor.wysiwygEditorInsertHtml(tweet);
+					    editor.document.defaultView.twttr.widgets.load();
 					});
 				},
 				txtExec: function (caller) {
 				    var editor = this;
-				    $.sceditor.command.get('twitter')._dropDown(editor, caller, function(api_url, link, widget_type, hide_media, width) {
+				    $.sceditor.command.get('twitter')._dropDown(editor, caller, function(link, widget_type, hide_media, width) {
 		                var tweet='[twitter width=' + width + ' type=' + widget_type;
 		                tweet += hide_media? ' hide_media=1' : '';
 		                tweet += ']' + link + '[/twitter]';
@@ -569,23 +596,22 @@ $(document).ready(function()
                     'stylename': null
                 },
                 tags: {
-                    iframe: {
-                        'class': ['twitter'],
+                    div: {
+                        'class': ['twitter-div'],
                     }
                 },
                 quoteType: $.sceditor.BBCodeParser.QuoteType.never,
                 isInline: false,
-                breakAfter: true,
                 format: function(element, content) {
                 	var link = $(element).attr('link') || '';
                 	if( !(/^https?:\/\/twitter\.com\/(\w+)\/status\/(\d+)/i).test(link) ){
                 		return '';
                 	}
-                	var width = $(element).attr('width') || '500';
+                	var width = $(element).attr('data-width');
 	            	width = Math.max(width, 320);
 	            	width = Math.min(width, 900);
-                	var widget_type = ((wt = $(element).attr('widget_type')) && wt === 'video')? 'video' : 'tweet';
-                	var hide_media = $(element).attr('hide_media')? ' hide_media=1' : '';
+                	var widget_type = $(element).attr('widget_type');
+                	var hide_media = $(element).attr('data-cards')? ' hide_media=1' : '';
                 	return '[twitter width=' + width + ' type=' + widget_type + hide_media + ']' + link + '[/twitter]';
                 },
                 html: function(token, attrs, content) {
@@ -614,14 +640,361 @@ $(document).ready(function()
 					$.each(data, function(dkey, dval){
 						api_url += '&' + dkey + '=' + dval;
 					});
-			    	hide_media = hide_media? ' hide_media="1"' : '';
-	                var tweet='<iframe class="twitter" width="' + width + '" src="' + api_url + '" widget_type="' + widget_type + '"' + hide_media + ' link="' + link + '" frameborder="0" allowfullscreen></iframe><br />';
+			    	hide_media = hide_media? ' data-cards="hidden"' : '';
+	                var tweet='<div contentEditable="false" class="twitter-div" style="width: ' + width + 'px;"widget_type="' + widget_type + '"' + hide_media + ' link="' + link + '" data-width="' + width + '"><blockquote class="twitter-' + widget_type + '" data-lang="ru" data-width="' + width + '"' + hide_media + '><a href="' + link + '"><span class="twitter-logo"></span></a></blockquote></div>';
                     return tweet;
                 }
             });
 
+            // Video command
+            $.sceditor.command.set("video", {
+            	_checkURL: function(url, callback){
+				    var videoId = videoURL = '', matches, params={};
+            		// youtube 
+					$.each([/^https?:\/\/youtu\.be\/([a-z0-9\-\=\_]+)((\?.+[&#]|\?)t=(\d+m\d{1,2}s|\d+[sm]))?/i,
+							/^https?:\/\/www\.youtube\.com\/embed\/([a-z0-9\-\=\_]+)((\?.+[&#]|\?)start=(\d+))?/i,
+							/^https?:\/\/www\.youtube\.com\/watch\?v=([a-z0-9\-\=\_]+)([&#](.*[&#])?t=(\d+m\d{1,2}s|\d+[sm]))?/i],
+						function(idx, reg){
+							if ( (matches = url.match(reg)) && matches.length == 5 ){
+		                        videoId = matches[1];
+		                        if( typeof matches[4] !== 'undefined' ){
+		                        	params['start'] = eval( matches[4].replace(/m/i, '*60+').replace(/s/i, '').replace(/\+$/, '') );
+		                        }
+								return false;
+							}
+						}
+					);
+					if( videoId !== '' ){
+						$.ajax({
+							url: APP_URL + '/video_api.php?vt=youtube&id=' + videoId,
+							type: 'GET',
+							dataType: 'json',
+							success: function(result){
+								if( typeof result['error'] !== 'undefined' ){
+									callback(result);
+									return;	
+								}
+								var vdata = JSON.parse(result['data']);
+								callback({
+									type: 'youtube',
+									id: videoId,
+									title: '<span style="font-weight: bold;">' + vdata.author_name + '.</span> ' + vdata.title,
+									width: vdata.width, 
+									height: vdata.height,
+									aspectRatio: vdata.width / vdata.height,
+									thumb: vdata.thumbnail_url,
+									start: (typeof params['start'] !== 'undefined')? params['start'] : 0,
+								});
+								return;
+							},
+							error: function(xhr, status, errstr){
+								console.log(xhr);
+                                callback( {error: 'Ошибка при запросе video_api.php: ' + status + ': ' + errstr} );
+						        return;
+							}
+						});
+						return;
+					}
+            		// rutube
+					$.each([/^(https?:\/\/rutube\.ru\/play\/embed\/([0-9]+))/i,
+							/^(https?:\/\/rutube\.ru\/tracks\/[0-9]+\.html)/i,
+							/^(https?:\/\/rutube\.ru\/video\/[a-z0-9\-\=\_]+)/i],
+						function(idx, reg){
+							if ( (matches = url.match(reg)) ){
+								if( matches.length == 3 ){
+									videoURL = 'https://rutube.ru/tracks/' + matches[2] + '.html';
+								}else{
+									videoURL = matches[1] + '/';
+								}
+								return false;
+							}
+						}
+					);
+					if( videoURL !== '' ){
+						$.ajax({
+							url: APP_URL + '/video_api.php?vt=rutube&url=' + encodeURIComponent(videoURL),
+							type: 'GET',
+							dataType: 'json',
+							success: function(result){
+								if( typeof result['error'] !== 'undefined' ){
+									callback(result);
+									return;	
+								}
+								var vdata = JSON.parse(result['data']);
+								callback({
+									type: 'rutube',
+									html: vdata.html,
+									frameSrc: vdata.html.replace(/^.*?src="(.+?)".*?$/i, "$1"),
+									title: '<span style="font-weight: bold;">' + vdata.author_name + '.</span> ' + vdata.title,
+									width: vdata.width, 
+									height: vdata.height,
+									aspectRatio: vdata.width/vdata.height,
+									thumb: vdata.thumbnail_url,
+								});
+								return;
+							},
+							error: function(xhr, status, errstr){
+								console.log(xhr);
+                                callback( {error: 'Ошибка при запросе video_api.php: ' + status + ': ' + errstr} );
+						        return;
+							}
+						});
+						return;
+					}
+					// twitter
+					var tweet_check = $.sceditor.command.get('twitter')._checkURL( url, { 'omit_script': "true", 'lang': "ru", 'widget_type': "video" }, function(result){
+						callback(result);
+					});
+					if( tweet_check == 0 ){
+						return;
+					}
+					// vimeo
+                    callback( {error: 'Неизвестный видео-URL: ' + url} );
+            	},
+				_dropDown: function (editor, caller, action) {
+                    var $content = $('<div>')
+                    	.append($('<div id="wiz_page1"></div>') // Первая страница wizard-а
+                    		.append(
+                    			$('<div class="video_data_block" style="display: block;">')
+	                    			.append('<label for="link">URL:</label>',
+		                    			($link = $('<input type="text" id="link" style="width: 260px;" value="" />'))
+		                    		),
+                    			'<div class="video_data_block" style="display: block;">Поддерживаемые видео: youtube, rutube, twitter</div>',
+	                    		$('<input type="button" class="button" value="Далее" />')
+	                    			.click(function(e){
+	                    				$.sceditor.command.get('video')._checkURL( $link.val(), function(vid){
+	                    					if( typeof vid.error !== 'undefined' ){
+				                                alert(vid.error);
+											    $content.find('#link').focus();
+											    e.preventDefault();
+										        return;
+	                    					}
+	                    					$("#videoType").val(vid.type);
+	                    					if( typeof vid.id !== 'undefined' ){
+		                    					$("#videoId").val(vid.id);
+	                    					}
+	                    					if( typeof vid.frameSrc !== 'undefined' ){
+		                    					$("#frameSrc").val(vid.frameSrc);
+	                    					}
+	                    					if( typeof vid.link !== 'undefined' ){
+		                    					$("#videoLink").val(vid.link);
+	                    					}
+	                    					$("#p2_title").empty()
+	                    						.append('<div style="float: left;"><img style="display: block; width: 75px;" src="' + vid.thumb + '"/></div>',
+	                    							 '<div style="margin-left: 85px; color: #888;">' + vid.title + '</div>'
+	                    						);
+	                    					$("#video_width").attr('ar', vid.aspectRatio).val(vid.width).change();
+	                    					if( typeof vid.start !== 'undefined' ){
+		                    					if(vid.start > 0){
+		                    						$("#video_start").val( [(m = Math.floor(vid.start / 60)), (vid.start - m * 60).dd()].join(':') );
+		                    					}
+		                    				}else{
+		                    					$("#p2_start").hide();
+		                    				}
+		                    				$("#wiz_page1").hide();
+		                    				$("#wiz_page2").show();
+	                    				});
+									    e.preventDefault();
+								        return;
+	                    			})
+	                    	)
+                    	)
+                    	.append($('<div id="wiz_page2" style="display: none;"></div>') // Вторая страница wizard-а
+                    		.append('<div class="video_data_block" id="p2_title" style="display: block;">',
+                    			$('<div class="video_data_block" id="p2_width">')
+                    				.append('<label for="video_width">Размер:</label>',
+		                    			$('<input type="text" id="video_width" size="4" maxlength="3" value="500" ar="1.333" />')
+		                    				.change(function(){
+		                    					if($(this).attr('ar') == 'none'){
+		                    						$("#video_height").val('-?-');
+		                    						return;
+		                    					}
+		                    					var ar = parseFloat( $(this).attr('ar') ), val = parseInt( $(this).val() );
+		                    					if( isNaN(ar) ){
+		                    						$(this).attr('ar', ar = 1.333);
+		                    					}
+		                    					if( isNaN(val) ){
+		                    						$(this).val(val = 500);
+		                    					}
+		                    					$("#video_height").val( Math.round(val/ar) );
+		                    				})
+		                    				.keyup(function(){
+		                    					if($(this).attr('ar') == 'none'){
+		                    						$("#video_height").val('-?-');
+		                    						return;
+		                    					}
+		                    					var ar = parseFloat( $(this).attr('ar') ), val = parseInt( $(this).val() );
+		                    					if( isNaN(ar) ){
+		                    						$(this).attr('ar', ar = 1.333);
+		                    					}
+		                    					if( isNaN(val) ){
+		                    						return;
+		                    					}
+		                    					$("#video_height").val( Math.round(val/ar) );
+		                    				}),
+		                    			'&nbsp;X&nbsp;<input type="text" id="video_height" size="4" maxlength="3" value="" disabled />'
+		                    		),
+                    			$('<div class="video_data_block" id="p2_start">')
+                    				.append('<label for="video_start">Начало:</label>',
+		                    			$('<input type="text" id="video_start" size="6" maxlength="6" value="0:00" intval="0" />')
+		                    				.change(function(){
+		                    					var val = $(this).val().split(':'), intval = 0, strval = '';
+		                    					for(var i = 0; i < 2 && i < val.length; i++){
+		                    						val[i] = parseInt(val[i]);
+		                    						val[i] = isNaN(val[i])? 0 : val[i];
+		                    						if( i == 1 || val.length == 1 ){
+		                    							val[i] = val[i].rr(0, 59);
+		                    						}
+		                    						intval += (i == 0 && val.length > 1)? 60 * val[i] : val[i];
+		                    						strval += (i == 1)? ':'+val[i].dd() : val[i];
+		                    					}
+		                    					$(this).attr('intval', intval).val(strval);
+		                    				})
+		                    		),
+                    			$('<input type="button" class="button" value="Вставить" />')
+	                    			.click(function(e){
+	                    				var width = parseInt($("#video_width").val()), height = parseInt($("#video_height").val()),
+	                    					frameSrc = $("#frameSrc").val().replace(/^\/\//, 'https://');
+	                    				width = isNaN(width)? 480 : width;
+	                    				height = isNaN(height)? 270 : height;
+	                    				action( $("#videoType").val(), $("#videoId").val(), frameSrc, $("#videoLink").val(), width, height, $("#video_start").change().attr('intval') );
+				                        editor.closeDropDown(true);
+				                        e.preventDefault();
+	                    			}),
+	                    		'<input type="hidden" id="videoType" value="" /><input type="hidden" id="videoId" value="" /><input type="hidden" id="frameSrc" value="" /><input type="hidden" id="videoLink" value="" />'
+                    		)
+                    	);
+                    editor.createDropDown(caller, 'video_wizard', $content);
+                    var dd_top = $("#messageBBCodeForm").offset().top * 1 + 40 * 1,
+                    	dd_left = $("#messageBBCodeForm").offset().left * 1 + 
+                    			$("#messageBBCodeForm")[0].clientWidth / 2 - 
+                    			$(".sceditor-dropdown")[0].clientWidth / 2;
+                    $(".sceditor-dropdown").css({
+                    	top: dd_top + 'px',
+                    	left: dd_left + 'px'
+                    });
+                },
+                forceNewLineAfter: ['iframe'],
+				exec: function (caller) {
+				    var editor = this;
+				    $.sceditor.command.get('video')._dropDown(editor, caller, function(vtype, videoId, frameSrc, videoLink, width, height, start) {
+				    	var vhtml = '';
+				    	switch(vtype){
+				    		case 'youtube' :
+				    			start = (start > 0)? '?start='+start : '';
+				    			vhtml = '<iframe class="youtube-video" width="' + width + '" height="' + height + '" src="https://www.youtube.com/embed/' + videoId + start + '" frameborder="0" allowfullscreen></iframe>';
+				    			break;
+				    		case 'rutube' :
+				    			vhtml = '<iframe class="rutube-video" width="' + width + '" height="' + height + '" src="' + frameSrc + '" frameborder="0" allowfullscreen></iframe>';
+				    			break;
+				    		case 'twitter' :
+				    			vhtml = '<div contentEditable="false" class="twitter-div" style="width: ' + width + 'px;" widget_type="video" link="' + videoLink + '" data-width="' + width + '"><blockquote class="twitter-video" data-lang="ru" data-width="' + width + '"><a href="' + videoLink + '"><span class="twitter-logo"></span></a></blockquote></div><br />';
+								break;
+				    		default :
+				    			vhtml = '<span style="color: #a00;">Неизвестный тип видео</span>';
+				    	}
+					    editor.wysiwygEditorInsertHtml(vhtml);
+					    if( vtype == 'twitter' ){
+					    	editor.document.defaultView.twttr.widgets.load();
+					    }
+					});
+				},
+				txtExec: function (caller) {
+				    var editor = this;
+				    $.sceditor.command.get('video')._dropDown(editor, caller, function(vtype, videoId, frameSrc, videoLink, width, height, start) {
+				    	var vtext = '';
+				    	switch(vtype){
+				    		case 'youtube':
+				    			start = (start > 0)? ' start='+start : '';
+				    			vtext = '[video type=youtube width=' + width + ' height=' + height + start + ']https://www.youtube.com/embed/' + videoId + '[/video]';
+				    			break;
+				    		case 'rutube':
+				    			vtext = '[video type=rutube width=' + width + ' height=' + height + ']' + frameSrc + '[/video]';
+				    			break;
+				    		case 'twitter':
+		                		vtext = '[twitter width=' + width + ' type=video]' + videoLink + '[/twitter]';
+				    			break;
+				    		default:
+				    			vtext = 'Неизвестный тип видео';
+				    	}
+					    editor.insertText(vtext);
+					});
+				},
+				tooltip: 'Вставить видео'
+            });
+
+            // video bbcode
+            $.sceditor.plugins.bbcode.bbcode.set('video', {
+                styles: {
+                    'stylename': null
+                },
+                tags: {
+                    iframe: {
+                        'class': ['youtube-video', 'rutube-video'],
+                    }
+                },
+                quoteType: $.sceditor.BBCodeParser.QuoteType.never,
+                isInline: false,
+                format: function(element, content) {
+                	var vtext = vtype = '', matches;
+                	$.each(['youtube-video', 'rutube-video', 'twitter-video'], function(idx, val){
+                		if( $(element).hasClass(val) ){
+                			vtype = val.replace(/-video/, '');
+                			return false;
+                		}
+                	});
+                	switch(vtype){
+                		case 'youtube':
+                			if( (matches = $(element).attr('src').match(/^https?:\/\/www\.youtube\.com\/embed\/([a-z0-9\-\=\_]+)(\?start=(\d+))?/i)) ){
+                				var start = (typeof matches[3] !== 'undefined')? ' start=' + matches[3] : '';
+				    			vtext = '[video type=youtube width=' + $(element).attr('width') + ' height=' + $(element).attr('height') + start + ']https://www.youtube.com/embed/' + matches[1] + '[/video]';
+                			}
+                			break;
+                		case 'rutube':
+                			if( (matches = $(element).attr('src').match(/^https?:\/\/rutube\.ru\/play\/embed\/([0-9]+)/i)) ){
+				    			vtext = '[video type=rutube width=' + $(element).attr('width') + ' height=' + $(element).attr('height') + ']' + matches[0] + '[/video]';
+                			}
+                			break;
+	                }
+	                return vtext;
+                },
+                html: function(token, attrs, content) {
+                	var tmp_id = Math.random().toString(36).substr(2, 5), // Генерируем случайную строку из 5 символов
+                		vhtml = '';
+    				$.sceditor.command.get('video')._checkURL( content, function(vid){
+    					if( typeof vid.error !== 'undefined' ){
+                            console.log(vid.error);
+                            $(sceD.document).find("#"+tmp_id).replaceWith('');
+					        return;
+    					}
+				    	switch(vid.type){
+				    		case 'youtube' :
+				    			var start = (typeof attrs.start !== 'undefined' && attrs.start > 0)? '?start=' + attrs.start : '';
+				    				start = (start == '' && typeof vid.start !== 'undefined' && vid.start > 0)? '?start=' + vid.start : start;
+				    			var width = (typeof attrs.width !== 'undefined')? attrs.width : vid.width, 
+				    				height = (typeof attrs.height !== 'undefined')? attrs.height : vid.height; 
+				    			vhtml = '<iframe class="youtube-video" width="' + width + '" height="' + height + '" src="https://www.youtube.com/embed/' + vid.id + start + '" frameborder="0" allowfullscreen></iframe>';
+				    			break;
+				    		case 'rutube' :
+				    			var width = (typeof attrs.width !== 'undefined')? attrs.width : vid.width, 
+				    				height = (typeof attrs.height !== 'undefined')? attrs.height : vid.height,
+				    				frameSrc = vid.frameSrc.replace(/^\/\//, 'https://'); 
+				    			vhtml = '<iframe class="rutube-video" width="' + width + '" height="' + height + '" src="' + frameSrc + '" frameborder="0" allowfullscreen></iframe>';
+				    			break;
+				    		default :
+				    			vhtml = '<span style="color: #a00;">Неизвестный тип видео</span>';
+				    	}
+				    	// Заменяем временный div на код видео
+					    $(sceD.document).find("#"+tmp_id).replaceWith(vhtml);
+    				});
+    				// Так как код нужно вернуть сразу, а он ещё проверяется _checkURL и будет готов только в callBack-функции,
+    				// возвращаем временный div с уникальным id, по готовности заменим его напрямую в редакторе 
+                    return '<div id="' + tmp_id + '" style="display: none;"></div>';
+                }
+            });
+
             this.editor = $(this.instance).find('textarea').sceditor({
-                toolbar: 'emoticon|pastetext|bold,italic,underline,strike,superscript,subscript|left,center,right,justify|bulletlist,orderedlist|horizontalrule|quote,qsplit,spoiler|link,unlink,image|youtube,rutube,twitter|table|size,color|removeformat,maximize,source',
+                toolbar: 'emoticon|pastetext|bold,italic,underline,strike,superscript,subscript|left,center,right,justify|bulletlist,orderedlist|horizontalrule|quote,qsplit,spoiler|link,unlink,image|video,twitter|table|size,color|removeformat,maximize,source',
                 toolbarExclude: 'font',
                 style: '/themes/glav/styles/sceditor.editor.css',
                 colors: 'aqua,black,blue,fuchsia|gray,green,lime,maroon|navy,olive,purple,red|silver,teal,white,yellow',
@@ -706,11 +1079,16 @@ $(document).ready(function()
                 enablePasteFiltering: true,
                 plugins: 'bbcode',
                 width: '100%',
-                bbcodeTrim: true,
+                bbcodeTrim: false,
                 runWithoutWysiwygSupport: true,
                 //emoticonsCompat: true,
             });
             var sceD = this.editor.sceditor('instance');
+            sceD.document = sceD.getBody()[0].ownerDocument;
+           	var script = sceD.document.createElement('script');  
+			script.type = 'text/javascript';  
+			script.src = 'twitter.widjets.js';  
+			$(sceD.document).find('head')[0].appendChild(script);
             sceD.bind('keypress', function(e){
             	var replace_list = [
             			['--', '–'],	// Двойной дефис на тире (ndash)
@@ -735,6 +1113,29 @@ $(document).ready(function()
 	            	}
             	}
             }, false, false);
+            sceD.insertString = function(editor, str){
+				if( editor.inSourceMode() === true ){
+					editor.insertText(str);
+            	}else{
+            		editor.wysiwygEditorInsertHtml(str);
+            	}
+            };
+            (function(){
+            	$.each( {'ctrl+alt+-': '–', 'ctrl+shift+_': '—', 'ctrl+\'': '́'}, 
+            		function(shcat, str){
+			            sceD.addShortcut(shcat, function(){
+							if( this.inSourceMode() === true ){
+								this.insertText(str);
+			            	}else{
+			            		this.wysiwygEditorInsertHtml(str);
+			            	}
+			            });
+	            	}
+	            );
+            })();
+            sceD.bind('focus', function(e){
+				sceD.document.defaultView.twttr.widgets.load();
+            }, false, true);
         }
     });
 });

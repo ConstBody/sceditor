@@ -109,6 +109,11 @@ hr {
 .spoilerContent {
 	margin-top: 10px;
 }
+.twitter-div {
+	display: block;
+	height: auto;
+	border: 1px solid #ddd;
+}
 .twitter-logo {
 	display: block;
 	width: 16px;

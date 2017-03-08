@@ -515,84 +515,14 @@ class Forum_Api_ParseBBCode
             ),
             'twitter1' => array(
                 'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
+                'test' => '.*?\]\s*(https?://twitter\.com/\w+/status/\d+)\s*\[/twitter\]',
                 'parameters' => array(
-                    'width' => array('match' => '(\d{3})'),
-                    'type' => array('match' => '(tweet)'),
-                    'hide_media' => array('match' => '(1)'),
+                    'width' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '500'),
+                    'type' => array('optional' => true, 'match' => '(tweet|video)', 'value' => 'twitter-$1', 'default' => 'twitter-tweet'),
+                    'hide_media' => array('optional' => true, 'match' => '(1|true)', 'value' => ' data-cards="hidden"'),
                 ),
-                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="{width}" data-cards="hidden"><a href="',
-                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
-                'isBlock' => true
-            ),
-            'twitter2' => array(
-                'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
-                'parameters' => array(
-                    'width' => array('match' => '(\d{3})'),
-                    'type' => array('match' => '(tweet|video)'),
-                ),
-                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="{width}"><a href="',
-                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
-                'isBlock' => true
-            ),
-            'twitter3' => array(
-                'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
-                'parameters' => array(
-                    'width' => array('match' => '(\d{3})'),
-                ),
-                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="{width}"><a href="',
-                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
-                'isBlock' => true
-            ),
-            'twitter4' => array(
-                'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
-                'parameters' => array(
-                    'width' => array('match' => '(\d{3})'),
-                    'hide_media' => array('match' => '(1)'),
-                ),
-                'before' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="{width}" data-cards="hidden"><a href="',
-                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
-                'isBlock' => true
-            ),
-            'twitter5' => array(
-                'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
-                'parameters' => array(
-                    'type' => array('match' => '(tweet|video)'),
-                ),
-                'before' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="500"><a href="',
-                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
-                'isBlock' => true
-            ),
-            'twitter6' => array(
-                'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
-                'parameters' => array(
-                    'type' => array('match' => '(tweet|video)'),
-                    'hide_media' => array('match' => '(1)'),
-                ),
-                'before' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-{type}" data-lang="ru" data-width="500" data-cards="hidden"><a href="',
-                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
-                'isBlock' => true
-            ),
-            'twitter7' => array(
-                'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_ATTRIBUTES,
-                'parameters' => array(
-                    'hide_media' => array('match' => '(1)'),
-                ),
-                'before' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="500" data-cards="hidden"><a href="',
-                'after' => '"><span class="twitter-logo"></span></a></blockquote></div>',
-                'isBlock' => true
-            ),
-            'twitter8' => array(
-                'tag' => 'twitter',
-                'type' => self::TYPE_UNPARSED_CONTENT,
-                'test' => '\s*(https?://twitter\.com/\w+/status/\d+)\s*\[/twitter\]',
-                'content' => '<div class="cBlockTwitter" style="width: 500px;"><blockquote class="twitter-tweet" data-lang="ru" data-width="500"><a href="$1"><span class="twitter-logo"></span></a></blockquote></div>',
+                'content' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="{type}" data-lang="ru" data-width="{width}"{hide_media}><a href="$1"><span class="twitter-logo"></span></a></blockquote></div>',
                 'isBlock' => true
             ),
         ),
@@ -625,6 +555,33 @@ class Forum_Api_ParseBBCode
                 'before' => '<span style="text-decoration: underline;">',
                 'after' => '</span>'
             )
+        ),
+        'v' => array(
+            'video1' => array( //youtube
+                'tag' => 'video',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
+                'test' => '.*?\]\s*(https?://www\.youtube\.com/embed/[0-9a-zA-Z\?\-\_\=]+)\s*\[/video\]',
+                'parameters' => array(
+                    'width' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '400'),
+                    'height' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '300'),
+                    'start' => array('optional' => true, 'match' => '(\d{1,5})', 'value' => '?start=$1', 'default' => ''),
+                    'type' => array('match' => '(youtube|rutube)', 'value' => '$1-video'),
+                ),
+                'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1{start}" frameborder="0" allowfullscreen></iframe>',
+                'isBlock' => true
+            ),
+            'video2' => array( // rutube
+                'tag' => 'video',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
+                'test' => '.*?\]\s*(https?://rutube\.ru/play/embed/\d+)\s*\[/video\]',
+                'parameters' => array(
+                    'width' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '400'),
+                    'height' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '300'),
+                    'type' => array('match' => '(youtube|rutube)', 'value' => '$1-video'),
+                ),
+                'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe>',
+                'isBlock' => true
+            ),
         ),
         'w' => array(
             'white' => array(
@@ -1025,10 +982,10 @@ class Forum_Api_ParseBBCode
                         // Just to make sure: replace any $ or { so they can't interpolate wrongly.
                         $params['{' . $key . '}'] = strtr($params['{' . $key . '}'], array('$' => '&#036;', '{' => '&#123;'));
                     }
-
+                    
                     foreach ($possibleTag['parameters'] as $p => $info) {
                         if (!isset($params['{' . $p . '}']))
-                            $params['{' . $p . '}'] = '';
+                            $params['{' . $p . '}'] = ( isset($info['default']) )? $info['default'] : '';
                     }
 
                     $tag = $possibleTag;

@@ -9,27 +9,30 @@ window.twttr = (function(d, s, id) {
 	
 	t._e = [];
 	t.ready = function(f) {
-		console.log("Script loaded");
 		t._e.push(f);
 	};
 	
 	return t;
 }(document, "script", "twitter-wjs"));
-/* 
+ 
 // Binding twitter widgets events
 twttr.ready(function (twttr) {
 // Occurs after twttr.widgets.load has initialized widgets in a page. 
 // Includes an array of references to the newly created widget nodes.
-	twttr.events.bind('loaded', function (event) {
-		event.widgets.forEach(function (widget) {
-			console.log("Created widget", widget.id);
-		});
-	});
+//	twttr.events.bind('loaded', function (event) {
+//		event.widgets.forEach(function (widget) {
+//			console.log("Created widget", widget.id);
+//		});
+//	});
 // Occurs after an individual widget in a page is rendered. Includes a 
 // reference to the newly created widget node. Occurs at the same time 
 // as loaded, but for each individual widget.
 	twttr.events.bind('rendered', function (event) {
-		console.log("Created widget", event.target);
+		if (event.target.classList.contains('twitter-tweet-error')) {
+			event.target.innerHTML = event.target.innerHTML + '<br /><span style="color: #a00000;">Ошибка загрузки твита.<br />Возможно твита с таким адресом не существует.</span>';
+		}
+		if (event.target.classList.contains('twitter-video-error')) {
+			event.target.innerHTML = event.target.innerHTML + '<br /><span style="color: #a00000;">Ошибка загрузки видео из твита.<br />Возможно твит не содержит видео.</span>';
+		}
 	});
 });
-*/

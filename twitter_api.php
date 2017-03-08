@@ -1,5 +1,22 @@
 <?php
 
+/*
+ * Method for loading remote url
+ * @param string $url Remote url
+ * @return mixed $data Results of an request
+ * */
+function Curl($url = '') {
+	if (empty($url)) {return false;}
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+	$data = curl_exec($ch);
+	return $data;
+}
+
 $api_url = 'https://publish.twitter.com/oembed';
 $api_params = array(
 	'url' => array(
@@ -48,15 +65,17 @@ $api_params = array(
 	),
 );
 $tweet_link = '';
+$tweet_id = '';
 $widget_class = 'twitter-tweet';
 $widget_attributes = '';
 $request_url = $api_url.'?';
 foreach($api_params as $p_key => $p_param){
-	if( isset($_GET[$p_key]) && preg_match($p_param['pattern'], $_GET[$p_key]) ){
+	if( isset($_GET[$p_key]) && preg_match($p_param['pattern'], $_GET[$p_key], $matches) ){
 		$request_url .= preg_match('/\?$/', $request_url)? '' : '&';
 		$request_url .= $p_key.'='.$_GET[$p_key];
 		if( $p_key == 'url' ){
 			$tweet_link = $_GET[$p_key];
+			$tweet_id = $matches[2];
 		}elseif( $p_key == 'widget_type' ){
 			$widget_class = $p_param['data'];
 		}else{
@@ -116,7 +135,7 @@ if( isset($_GET['iframe']) && preg_match('/^(true|1)$/', $_GET['iframe']) ){
 	$resp['tweet_link'] = $tweet_link;
 	$resp['widget_class'] = $widget_class;
 	$resp['widget_attributes'] = $widget_attributes;
-	$r = new HttpRequest($request_url, HttpRequest::METH_GET);
+/*	$r = new HttpRequest($request_url, HttpRequest::METH_GET);
 	$r->setHeaders(array('Content-Type' => 'application/json'));
 	try {
 		$r->send();
@@ -129,6 +148,27 @@ if( isset($_GET['iframe']) && preg_match('/^(true|1)$/', $_GET['iframe']) ){
 	} catch (HttpException $ex) {
 		$resp['error'] = 'Exception: '.$ex;
 	}
+*/
+	$jdata = Curl($request_url);
+	if( $jdata ){
+		$resp['tweet'] = $jdata;
+		if( isset($_GET['extra_info']) && preg_match('/^(true|1)$/', $_GET['extra_info']) && $widget_class == 'twitter-video' ){
+			$player_url = 'https://twitter.com/i/videos/tweet/'.$tweet_id.'?embed_source=clientlib&player_id=0&rpc_init=1&language_code=ru';
+			$player_html = Curl($player_url);
+			if( $player_html ){
+				if( preg_match('/div id="playerContainer" class="player-container"  data-config="(.*?)"/im', $player_html, $matches) ){
+					$resp['player_data'] = $matches[1];
+				}
+			}else{
+				$resp['error'] = "Вероятно, данный твит не содержит видео.";
+			}
+			
+		}
+	}else{
+		$resp['error'] = "Возможно, ошибка в адресе твита. ".$request_url;
+	}
+
 	echo json_encode( $resp );
 }
+
 ?>
