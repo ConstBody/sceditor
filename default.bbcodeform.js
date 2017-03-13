@@ -1097,12 +1097,14 @@ $(document).ready(function()
             	e = e.originalEvent;
             	if( !e.altKey && !e.ctrlKey && e.which == 32 ){
 					if( sceD.inSourceMode() === true ){
-						var src_start = sceD.val().substr(0, sceD.sourceEditorCaret().start),
-							src_end = sceD.val().substr(sceD.sourceEditorCaret().start), re;
-            			$.each(replace_list, function(idx, repl){
-            				if( src_start.match( re = new RegExp('\\s' + repl[0] + '$') ) ){
-            					src_start = src_start.replace(re, ' ' + repl[1]);
-            					sceD.val(src_start + src_end);
+						var caret = sceD.sourceEditorCaret(),
+							src_start = sceD.val().substr(0, caret.start),
+							src_end = sceD.val().substr(caret.start), re;
+						$.each(replace_list, function(idx, repl){
+							if( src_start.match( re = new RegExp('\\s' + repl[0] + '$') ) ){
+								src_start = src_start.replace(re, ' ' + repl[1]);
+								sceD.val(src_start + src_end);
+								sceD.sourceEditorCaret( {start: (st = caret.start - repl[0].length + repl[1].length), end: st} );
             					return false;
             				}
             			});
