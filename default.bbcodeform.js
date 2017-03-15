@@ -522,7 +522,7 @@ $(document).ready(function()
 				_dropDown: function (editor, caller, action) {
 					var $content = $('<div>')
 						.append('<label for="link">URL:</label>',
-							($link = $('<input type="text" id="link" value="https://twitter.com/NASA/status/832607570107981824" />')),
+							($link = $('<input type="text" id="link" value="" />')),
 							'<br /><label for="width">Ширина:</label>',
 							($width = $('<input type="text" id="width" size="4" maxlength="3" value="500" />')),
 							'<br /><input type="radio" name="widget_type" value="tweet" id="twitter-tweet" checked />',
