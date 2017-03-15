@@ -109,6 +109,9 @@ hr {
 .spoilerContent {
 	margin-top: 10px;
 }
+.twitter-tweet, .twitter-video {
+	margin: 0;
+}
 .twitter-div {
 	display: block;
 	height: auto;
@@ -116,7 +119,7 @@ hr {
 }
 .twitter-logo {
 	display: block;
-	width: 16px;
-	height: 16px;
-	background-image: url('/themes/glav/images/twitter-logo.png');
+	width: 26px;
+	height: 26px;
+	background: url('/themes/glav/images/twitter-logo.png') 10px 10px no-repeat;
 }

@@ -2446,6 +2446,8 @@
 
 				updateToolBar();
 				updateActiveButtons();
+				
+				base.focus();
 			};
 
 			/**

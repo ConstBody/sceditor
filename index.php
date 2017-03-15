@@ -17,6 +17,7 @@
 <script type="text/javascript">
     //<![CDATA[
     APP_URL = "http://sce.ru";
+//    APP_URL = "http://alvig.ru/sce";
 	CSRF_TOKEN = "0f72438b1865d6ac10f83edbfbf33cdd7ea3611b";
     //]]>
 </script>
@@ -47,20 +48,24 @@ $(document).ready(function()
 		});
 
     });
+//    var eD = $("#messageBBCodeForm").find("textarea").sceditor("instance");
+//    $("#messageFormContentFieldWidget").change(function(){
+//    	console.log($(this).val());
+//    });
+
+//	twttr.ready(function (twttr) {
+//		twttr.events.bind('rendered', function (event) {
+//			$(event.target).closest(".cBlockTwitter").css({
+//				'width': "auto",
+//				'height': "auto",
+//				'background-color': "transparent"
+//			});
+//		});
+//		twttr.widgets.load();
+//	});
+
 });
-/*
-twttr.ready(function (twttr) {
-	twttr.events.bind('rendered', function (event) {
-		if (event.target.classList.contains('twitter-tweet-error')) {
-			event.target.innerHTML = event.target.innerHTML + '<br /><span class="twitter-err-message">Ошибка загрузки твита.<br />Возможно твита с таким адресом не существует.</span>';
-		}
-		if (event.target.classList.contains('twitter-video-error')) {
-			event.target.innerHTML = event.target.innerHTML + '<br /><span class="twitter-err-message">Ошибка загрузки видео из твита.<br />Возможно твит не содержит видео.</span>';
-		}
-		//console.log("Created widget", event.target);
-	});
-});
-*/
+
 var init_funcs = function(){
 	// спойлер
 	$(".cBlockSpoilerHeaderOff").click(function(){
@@ -99,10 +104,38 @@ ol {
 table.postTable td {
 	padding: 0 5px;
 }
+hr {
+	margin: 7px 0;
+}
+.forumMessagesListMessageContent .cBlock {
+	word-wrap: break-word;
+}
 .cBlockQuote, cBlockSpoiler {
 	margin: 4px 0;
 	position: relative;
 }
+.cBlockTwitter {
+	display: block;
+	height: auto;
+	background-color: white;
+	border-radius: 4px;
+	border: 1px solid transparent;
+}
+.twitter-err-message {
+	color: #a00000;
+}
+.twitter-tweet, .twitter-video {
+	margin: 0;
+}
+.twitter-logo {
+	display: block;
+	width: 26px;
+	height: 26px;
+	background: url('/themes/glav/images/twitter-logo.png') 10px 10px no-repeat;
+}
+/*end forum css*/
+
+/* Для окукливания длинных цитат */
 .cBlockQuoteContent {
 	max-height: 10em;
 	overflow: hidden;
@@ -124,28 +157,12 @@ table.postTable td {
 	width: 100%;
 	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAwCAYAAAACYxrZAAAACXBIWXMAAC4jAAAuIwF4pT92AAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY6xSsNQFEDPi6LiUCsEcXB4kygotupgxqQtRRCs1SHJ1qShSmkSXl7VfoSjWwcXd7/AyVFwUPwC/0Bx6uAQIYODCJ7p3MPlcsGo2HWnYZRhEGvVbjrS9Xw5+8QMUwDQCbPUbrUOAOIkjvjB5ysC4HnTrjsN/sZ8mCoNTIDtbpSFICpA/0KnGsQYMIN+qkHcAaY6addAPAClXu4vQCnI/Q0oKdfzQXwAZs/1fDDmADPIfQUwdXSpAWpJOlJnvVMtq5ZlSbubBJE8HmU6GmRyPw4TlSaqo6MukP8HwGK+2G46cq1qWXvr/DOu58vc3o8QgFh6LFpBOFTn3yqMnd/n4sZ4GQ5vYXpStN0ruNmAheuirVahvAX34y/Axk/96FpPYgAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAAAAj0lEQVR42uzWSw6AIAxF0da4z66tKy0jE6J8KmCN5nWGDE6IIVw2M4qcjYIHIECAAAHOz54vVPWRp0NEuAgS0bGxCubmCRfCXN0oPcCqev5ko5CI9MEBuAu5QAfshm6BuPgAAQIECBDgn7r09cQIi6iwTJyAmnCO1v7hbMqZN/VXN+MFRpd+H0wAAAD//wMAUNJBSc1FQBMAAAAASUVORK5CYII=') no-repeat center 8px;
 }
-.cBlockTwitter {
-	display: block;
-	height: auto;
-}
-.twitter-err-message {
-	color: #a00000;
-}
 
-hr {
-	margin: 7px 0;
-}
-.twitter-logo {
-	display: block;
-	width: 16px;
-	height: 16px;
-	background-image: url('/themes/glav/images/twitter-logo.png');
-}
 </style>
 
 <style type="text/css">
 /*sceditor.css*/
-.sceditor-button div {
+.sceditor-button div {/**/
     background-image: url('/themes/glav/images/sceditor2017-02-26.png');
 }
 .sceditor-button-qsplit div {/**/
@@ -177,6 +194,30 @@ div.sceditor-video_wizard .video_data_block {/**/
 }
 div.sceditor-video_wizard input {/**/
 	margin: 0;
+}
+div.sceditor-video_wizard .drop_down_lock {/**/
+	display: none;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: #fff;
+	opacity: 0.8;
+}
+div.sceditor-video_wizard .drop_down_lock .ajax_loader {/**/
+	display: block;
+	height: 100%;
+	width: 100%;
+	background: url('/themes/glav/images/ajax-loader.gif') center center no-repeat;
+}
+div.sceditor-video_wizard .title_footer {/**/
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	height: 30%;
+	background: linear-gradient(to top, #fff, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.0)) repeat scroll 0% 0% transparent;
 }
 </style>
 </head>
@@ -292,6 +333,14 @@ div.sceditor-video_wizard input {/**/
             <td class="fSeparator">&nbsp;</td>
             <td id="forumMessagesListMessageXXXContent" class="fItem forumMessagesListMessageContent">
 				<div id="postContent" class="cBlock">
+<!--				<video>
+	<source src="https://video.twimg.com/tweet_video/C6vGcCvWkAENGpF.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+				</video>
+<video poster="star.png" autoplay="autoplay" loop="loop" controls="controls" tabindex="0">
+<video loop="loop" controls="controls" tabindex="0" width="500">
+	<source src="https://video.twimg.com/tweet_video/C6gmqSMXEAI6iTa.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+</video>
+-->
 				</div>
             </td>
         </tr>
@@ -349,6 +398,7 @@ div.sceditor-video_wizard input {/**/
 [twitter]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]<br />
 [twitter width=300]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]<br />
 [twitter width=900 type=video]https://twitter.com/NASA/status/832607570107981824[/twitter]<br />
+https://www.facebook.com/likeWrld/videos/244707235937804/<br />
 -->
 
 </body>

@@ -518,11 +518,12 @@ class Forum_Api_ParseBBCode
                 'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
                 'test' => '.*?\]\s*(https?://twitter\.com/\w+/status/\d+)\s*\[/twitter\]',
                 'parameters' => array(
-                    'width' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '500'),
+                    'width' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '500'),
+                    'height' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => ' height: $1px;', 'default' => ''),
                     'type' => array('optional' => true, 'match' => '(tweet|video)', 'value' => 'twitter-$1', 'default' => 'twitter-tweet'),
                     'hide_media' => array('optional' => true, 'match' => '(1|true)', 'value' => ' data-cards="hidden"'),
                 ),
-                'content' => '<div class="cBlockTwitter" style="width: {width}px;"><blockquote class="{type}" data-lang="ru" data-width="{width}"{hide_media}><a href="$1"><span class="twitter-logo"></span></a></blockquote></div>',
+                'content' => '<div class="cBlockTwitter" style="width: {width}px;{height}"><blockquote class="{type}" data-lang="ru" data-width="{width}"{hide_media} data-conversation="none"><a href="$1"><span class="twitter-logo"></span></a></blockquote></div>',
                 'isBlock' => true
             ),
         ),
@@ -562,10 +563,10 @@ class Forum_Api_ParseBBCode
                 'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
                 'test' => '.*?\]\s*(https?://www\.youtube\.com/embed/[0-9a-zA-Z\?\-\_\=]+)\s*\[/video\]',
                 'parameters' => array(
-                    'width' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '400'),
-                    'height' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '300'),
+                    'width' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '480'),
+                    'height' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '270'),
                     'start' => array('optional' => true, 'match' => '(\d{1,5})', 'value' => '?start=$1', 'default' => ''),
-                    'type' => array('match' => '(youtube|rutube)', 'value' => '$1-video'),
+                    'type' => array('match' => '(youtube)', 'value' => '$1-video'),
                 ),
                 'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1{start}" frameborder="0" allowfullscreen></iframe>',
                 'isBlock' => true
@@ -575,9 +576,56 @@ class Forum_Api_ParseBBCode
                 'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
                 'test' => '.*?\]\s*(https?://rutube\.ru/play/embed/\d+)\s*\[/video\]',
                 'parameters' => array(
-                    'width' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '400'),
-                    'height' => array('optional' => true, 'match' => '(\d{3})', 'value' => '$1', 'default' => '300'),
-                    'type' => array('match' => '(youtube|rutube)', 'value' => '$1-video'),
+                    'width' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '480'),
+                    'height' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '270'),
+                    'type' => array('match' => '(rutube)', 'value' => '$1-video'),
+                ),
+                'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe>',
+                'isBlock' => true
+            ),
+            'video3' => array( // html5
+                'tag' => 'video',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
+                'test' => '.*?\]\s*(https?://video\.twimg\.com/tweet_video/[0-9a-zA-Z\?\-\_\=]+\.mp4)\s*\[/video\]',
+                'parameters' => array(
+                    'width' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '480'),
+                    'type' => array('match' => '(html5)', 'value' => '$1-video'),
+                ),
+                'content' => '<video class="{type}" loop="loop" controls="controls" tabindex="0" width="{width}"><source src="$1" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' /></video>',
+                'isBlock' => true
+            ),
+            'video4' => array( // facebook
+                'tag' => 'video',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
+                'test' => '.*?\]\s*(https://www\.facebook\.com/video/embed\?video_id=\d+)\s*\[/video\]',
+                'parameters' => array(
+                    'width' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '480'),
+                    'height' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '270'),
+                    'type' => array('match' => '(facebook)', 'value' => '$1-video'),
+                ),
+                'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe>',
+                'isBlock' => true
+            ),
+            'video5' => array( // vimeo
+                'tag' => 'video',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
+                'test' => '.*?\]\s*https://player\.vimeo\.com/video/\d+\s*\[/video\]',
+                'parameters' => array(
+                    'width' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '480'),
+                    'height' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '270'),
+                    'type' => array('match' => '(vimeo)', 'value' => '$1-video'),
+                ),
+                'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe>',
+                'isBlock' => true
+            ),
+            'video6' => array( // ustream
+                'tag' => 'video',
+                'type' => self::TYPE_UNPARSED_ATTRIBUTES_UNPARSED_CONTENT,
+                'test' => '.*?\]\s*https?://www\.ustream\.tv/embed/(recorded/)?(\d+)(\?.+?)?\s*\[/video\]',
+                'parameters' => array(
+                    'width' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '480'),
+                    'height' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '270'),
+                    'type' => array('match' => '(ustream)', 'value' => '$1-video'),
                 ),
                 'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe>',
                 'isBlock' => true
@@ -1211,7 +1259,8 @@ class Forum_Api_ParseBBCode
         while (preg_match('~</div><br /><br />~', $bbCode)) {
             $bbCode = preg_replace('~</div><br /><br />~', '</div><br />',  $bbCode);
         }
-
+/* 
+// Если контейнеру поста назначить css 'word-wrap: break-word;', то это не нужно - длинные слова будут переноситься и без лишних пробелов.
         $comments = preg_split( '((>)|(<))', $bbCode, - 1, PREG_SPLIT_DELIM_CAPTURE);
         $n = count($comments); 
         for($i = 0; $i < $n; $i ++) { 
@@ -1222,7 +1271,7 @@ class Forum_Api_ParseBBCode
             $comments[$i] = preg_replace( "#([^\s\n\r]{" .  self::LONG_WORD_LENGTH . "})#iu", "\\1 ", $comments[$i]);
         } 
         $bbCode = join("", $comments); 
-
+*/
         return $bbCode;
     }
 

@@ -34,5 +34,18 @@ twttr.ready(function (twttr) {
 		if (event.target.classList.contains('twitter-video-error')) {
 			event.target.innerHTML = event.target.innerHTML + '<br /><span style="color: #a00000;">Ошибка загрузки видео из твита.<br />Возможно твит не содержит видео.</span>';
 		}
+		if( typeof $ === 'function' ){
+			if( event.target.classList.contains('twitter-video') ){
+				$(event.target).closest(".cBlockTwitter").css({
+					'background-color': "transparent"
+				});
+			}else{
+				$(event.target).closest(".cBlockTwitter").css({
+					'width': "auto",
+					'height': "auto",
+					'background-color': "transparent"
+				});
+			}
+		}
 	});
 });
