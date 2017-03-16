@@ -174,6 +174,10 @@ hr {
 .sceditor-button-video div {/**/
     background-position: -792px 0px;
 }
+.sceditor-button-specsymbol div {/**/
+    /*background-position: -792px 0px;*/
+    background-image: url(https://glav.su/files/messages/f2b0cbedeeafbe675883cd6a311c7c67.gif);
+}
 div.sceditor-dropdown label {/**/
 	display: inline;
     font-weight: normal;
@@ -218,6 +222,25 @@ div.sceditor-video_wizard .title_footer {/**/
 	width: 100%;
 	height: 30%;
 	background: linear-gradient(to top, #fff, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.0)) repeat scroll 0% 0% transparent;
+}
+div.sceditor-specsymbols span.specsym {
+	cursor: pointer;
+	display: inline-block;
+	border: 1px solid #eee;
+	padding: 5px;
+	background-color: #fff;
+	color: black;
+	font-size: 16px;
+	font-weight: bold;
+	width: 16px;
+	height: 16px;
+	text-align: center;
+	text-indent: 0px;
+	vertical-align: middle;
+	line-height: 1;
+}
+div.sceditor-specsymbols span.specsym:hover {
+	background-color: #ddd;
 }
 </style>
 </head>

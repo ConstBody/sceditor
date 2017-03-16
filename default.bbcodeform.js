@@ -451,6 +451,52 @@ $(document).ready(function()
 				tooltip: 'Разбить цитату'
 			});
 
+			// SpecSymbol command
+			$.sceditor.command.set("specsymbol", {
+				_dropDown: function (editor, caller, callback) {
+					var symbols = [
+						{s: '©', d: 'Copyright'},{s: '®', d: 'Reserved'},{s: '™', d: 'Trade Mark'},{s: '€', d: 'Евро'},{s: '£', d: 'Фунт'},{s: '¥', d: 'Йена'},
+						{s: '§', d: 'Параграф'},{s: '«', d: 'Кавычка «уголки»'},{s: '»', d: 'Кавычка «уголки»'},{s: '́', d: 'Ударение'},{s: '–', d: 'Тире En Dash'},{s: '—', d: 'Тире Em Dash'},
+						{s: '¹', d: 'Первая степень'},{s: '²', d: 'Квадрат'},{s: '³', d: 'Куб'},{s: '·', d: 'Точка по центру'},{s: '•', d: 'Большая точка (bullet)'},{s: '…', d: 'Троеточие'},
+						{s: '±', d: 'Плюс-минус'},{s: '≈', d: 'Примерно равно'},{s: '≠', d: 'Не равно'},{s: '≡', d: 'Тождественно равно'},{s: '≤', d: 'Меньше или равно'},{s: '≥', d: 'Больше или равно'},
+						{s: '°', d: 'Градус'},{s: '√', d: 'Корень'},{s: '∫', d: 'Интеграл'},{s: 'µ', d: 'Мю'},{s: 'π', d: 'Пи'},{s: 'ω', d: 'Омега'},
+						{s: '∑', d: 'Сумма'},{s: 'λ', d: 'Лямбда'},{s: '∆', d: 'Дельта'},{s: '∂', d: 'Дифференциал'},{s: '∞', d: 'Бесконечность'},{s: 'ε', d: 'Эпсилон'},
+						{s: '¼', d: 'Четверть'},{s: '½', d: 'Одна вторая'},{s: '¾', d: 'Три четверти'},{s: '⅓', d: 'Одна треть'},{s: '⅔', d: 'Две трети'},{s: '⅛', d: 'Одна восьмая'},
+						{s: '←', d: 'Стрелка влево'},{s: '↑', d: 'Стрелка вверх'},{s: '→', d: 'Стрелка вправо'},{s: '↓', d: 'Стрелка вниз'},{s: '↔', d: 'Стрелка влево-вправо'},{s: '↕', d: 'Стрелка вверх-вниз'}
+					];
+					var	$content = $('<div />').append('<span style="display: block; width: 100%; text-align: center;"><input type="checkbox" id="noclose" /><label for="noclose">не закрывать</label></span>'), 
+						i = 0;
+					$.each(symbols, function(sidx, sym){
+						$('<span class="specsym" title="'+sym.d+'">'+sym.s+'</span>')
+							.click(function(e){
+								callback(sym.s);
+								if( !$("#noclose").prop('checked') ){
+									editor.closeDropDown(true);
+								}
+								e.preventDefault();
+							})
+							.appendTo($content);
+						if( ++i % 6 == 0 ) $content.append('<br />');
+					});
+					editor.createDropDown(caller, 'specsymbols', $content);
+				},
+				exec: function(caller){
+					var editor = this;
+					$.sceditor.command.get('specsymbol')._dropDown(editor, caller, function(html){
+							editor.wysiwygEditorInsertHtml(html);
+						}
+					);
+				},
+				txtExec: function(caller){
+					var editor = this;
+					$.sceditor.command.get('specsymbol')._dropDown(editor, caller, function(text){
+							editor.sourceEditorInsertText(text);
+						}
+					);
+				},
+				tooltip: 'Вставить спецсимвол'
+			});
+
 			// Twitter command
 			$.sceditor.command.set("twitter", {
 				_checkURL: function(url, data, callback){
@@ -1265,7 +1311,7 @@ $(document).ready(function()
 			});
 
 			this.editor = $(this.instance).find('textarea').sceditor({
-				toolbar: 'emoticon|pastetext|bold,italic,underline,strike,superscript,subscript|left,center,right,justify|bulletlist,orderedlist|horizontalrule|quote,qsplit,spoiler|link,unlink,image|video,twitter|table|size,color|removeformat,maximize,source',
+				toolbar: 'emoticon,specsymbol|pastetext|bold,italic,underline,strike,superscript,subscript|left,center,right,justify|bulletlist,orderedlist|horizontalrule|quote,qsplit,spoiler|link,unlink,image|video,twitter|table|size,color|removeformat,maximize,source',
 				toolbarExclude: 'font',
 				style: '/themes/glav/styles/sceditor.editor.css',
 				colors: 'aqua,black,blue,fuchsia|gray,green,lime,maroon|navy,olive,purple,red|silver,teal,white,yellow',
