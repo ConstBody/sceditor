@@ -93,7 +93,9 @@ var init_funcs = function(){
 		}
 	});
 	
-	twttr.widgets.load();
+	if( twttr && twttr.widgets ){
+		twttr.widgets.load();
+	}
 }
 </script>
 <style type="text/css">

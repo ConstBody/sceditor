@@ -630,7 +630,7 @@ $(document).ready(function()
 						}
 						editor.wysiwygEditorInsertHtml(thtml);
 						var win = editor.document.defaultView || editor.document.parentWindow;
-						if( win && win.twttr ){
+						if( win && win.twttr && win.twttr.widgets ){
 							win.twttr.widgets.load();
 						}
 					});
@@ -944,7 +944,7 @@ $(document).ready(function()
 								}
 								var vdata = JSON.parse(result['data']), thumb, thumb_style, username, title;
 								if( typeof vdata.video !== 'undefined' ){
-									thumb = vdata.video.thumbnail.default;
+									thumb = vdata.video.thumbnail['default'];
 									thumb_style = 'display: block; width: 75px;';
 									vdata = vdata.video;
 								}else{
@@ -1414,22 +1414,24 @@ $(document).ready(function()
 					], mdepth = 3;
 				e = e.originalEvent;
 				if( !e.altKey && !e.ctrlKey && e.which == 32 ){
-					if( sceD.inSourceMode() === true ){
-						var caret = sceD.sourceEditorCaret(),
-							src_start = sceD.val().substr(0, caret.start),
-							src_end = sceD.val().substr(caret.start), re;
-						$.each(replace_list, function(idx, repl){
-							if( src_start.match( re = new RegExp('\\s' + repl[0] + '$') ) ){
-								src_start = src_start.replace(re, ' ' + repl[1]);
-								sceD.val(src_start + src_end);
-								sceD.sourceEditorCaret( {start: (st = caret.start - repl[0].length + repl[1].length), end: st} );
-								return false;
-							}
-						});
-					}else{
-						sceD.getRangeHelper().replaceKeyword(
-							replace_list, false, true, mdepth, true, String.fromCharCode(e.which)
-						);
+					if( typeof $.sceditor.ie == 'undefined'){
+						if( sceD.inSourceMode() === true ){
+							var caret = sceD.sourceEditorCaret(),
+								src_start = sceD.val().substr(0, caret.start),
+								src_end = sceD.val().substr(caret.start), re;
+							$.each(replace_list, function(idx, repl){
+								if( src_start.match( re = new RegExp('\\s' + repl[0] + '$') ) ){
+									src_start = src_start.replace(re, ' ' + repl[1]);
+									sceD.val(src_start + src_end);
+									sceD.sourceEditorCaret( {start: (st = caret.start - repl[0].length + repl[1].length), end: st} );
+									return false;
+								}
+							});
+						}else{
+							sceD.getRangeHelper().replaceKeyword(
+								replace_list, false, true, mdepth, true, String.fromCharCode(e.which)
+							);
+						}
 					}
 				}
 			}, false, false);
@@ -1448,7 +1450,7 @@ $(document).ready(function()
 			})();
 			sceD.bind('focus', function(e){
 				var win = sceD.document.defaultView || sceD.document.parentWindow;
-				if( win && win.twttr ){
+				if( win && win.twttr && win.twttr.widgets ){
 					win.twttr.widgets.load();
 				}
 			}, false, true);
