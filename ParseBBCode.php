@@ -23,7 +23,7 @@ class Forum_Api_ParseBBCode
     /**
      * Константа длинной строки
      */
-    const LONG_WORD_LENGTH = 30;
+    const LONG_WORD_LENGTH = 50;
 
     /**
      * Константа неразрывного пробела
@@ -734,9 +734,10 @@ class Forum_Api_ParseBBCode
     protected function _parse($bbCode)
     {
         // удаляем теги html
-        $bbCode = trim(strip_tags($bbCode));
+        //$bbCode = trim(strip_tags($bbCode));
+        $bbCode = trim(htmlspecialchars($bbCode, ENT_NOQUOTES));
         // заменяем перевод новой строки, табуляцию
-	$bbCode = strtr($bbCode, array("\n" => '<br />', "\t" => '&nbsp;&nbsp;&nbsp;'));
+	$bbCode = strtr($bbCode, array("\n" => '<br />', "\t" => '&nbsp;&nbsp;&nbsp;&nbsp;'));
 
         // массив текущих открытых тегов
 	$openTags = array();
@@ -772,11 +773,20 @@ class Forum_Api_ParseBBCode
                           '~(?<=[\s>\.(;\'"]|^)((?:http|https|ftp)://[\w\-_%@:|]+(?:\.[\w\-_%]+)*(?::\d+)?(?:/[\w\-_\~%\.@,\?&;=#+:\'\\\\]*|[\(\{][\w\-_\~%\.@,\?&;=#(){}+:\'\\\\]*)*[/\w\-_\~%@\?;=#}\\\\])~iu',
                           '~(?<=[\s>(\'<]|^)(www(?:\.[\w\-_]+)+(?::\d+)?(?:/[\w\-_\~%\.@,\?&;=#+:\'\\\\]*|[\(\{][\w\-_\~%\.@,\?&;=#(){}+:\'\\\\]*)*[/\w\-_\~%@\?;=#}\\\\])~iu'
                         );
-                        $replacement = array(
-                            '[url]$1[/url]',
-                            '[url=http://$1]$1[/url]'
+//                        $replacement = array(
+//                            '[url]$1[/url]',
+//                            '[url=http://$1]$1[/url]'
+//                        );
+//                        $data = preg_replace($pattern, $replacement, $data);
+                        $data = preg_replace_callback(
+                        	$pattern, 
+                        	function ($matches){
+                        		$link_url = ( preg_match('~^(http|https|ftp)://~i', $matches[0]) )? $matches[0] : 'http://'.$matches[0];
+                        		$link_name = ( strlen($matches[0]) > self::LONG_WORD_LENGTH )? substr( $matches[0], 0, self::LONG_WORD_LENGTH ).'…' : $matches[0]; 
+                        		return '[url='.$link_url.']'.$link_name.'[/url]';
+                        	}, 
+                        	$data
                         );
-                        $data = preg_replace($pattern, $replacement, $data);
                         $data = strtr($data, array('\'' => '&#039;', "\xC2\xA0" => '&nbsp;', '>">' => '&quot;', '<"<' => '"', '<lt<' => '&lt;'));
                     }
                     // парсим emails
