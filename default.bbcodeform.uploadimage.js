@@ -40,6 +40,7 @@ $(document).ready(function()
                 '</tr>';
 
             $(this.form.instance).find(this.Class.list).append(row).show();
+            this.images.push(image);
         },
         init: function(form)
         {
@@ -59,6 +60,11 @@ $(document).ready(function()
                     widget.onClickUploadButton();
                 }
             });
+            this.images = [];
+            this.addImg = function(img){
+                widget.addImage(img);
+            };
+            this.onClickTypeUrlLabel();
         },
         onClickDeleteButton: function(event)
         {

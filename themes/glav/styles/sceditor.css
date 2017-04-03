@@ -40,7 +40,7 @@
     cursor: default;
 }
 .sceditor-button div {
-    background-image: url('/themes/glav/images/sceditor2017-02-26.png');
+    background-image: url('/themes/glav/images/sceditor2017-03-15.png');
     background-repeat: no-repeat;
     color: transparent;
     display: block;
@@ -158,9 +158,8 @@
 .sceditor-button-video div {
     background-position: -792px 0px;
 }
-.sceditor-button-specsymbol div {/**/
-    /*background-position: -792px 0px;*/
-    background-image: url(/files/messages/f2b0cbedeeafbe675883cd6a311c7c67.gif);
+.sceditor-button-specsymbol div {
+    background-position: -816px 0px;
 }
 .sceditor-color-column {
     float: left;
@@ -246,8 +245,13 @@ div.sceditor-dropdown form {
     margin: 0;
 }
 div.sceditor-dropdown label {
-    font-weight: normal;
     color: #3c3c3c;
+    display: block;
+    font-weight: bold;
+    padding: 4px 0;
+}
+div.sceditor-dropdown label.inline {
+    font-weight: normal;
 	display: inline;
     padding: 4px;
 }
@@ -264,6 +268,14 @@ div.sceditor-dropdown input, div.sceditor-dropdown textarea {
     -moz-border-radius: 0px;
     -webkit-background-clip: padding-box;
     -webkit-border-radius: 0px;
+}
+div.sceditor-dropdown input[type="text"] {
+	width: 200px;
+	height: 16px;
+	border: 1px solid #ccc;
+}
+div.sceditor-dropdown input.number {/**/
+	width: 40px;
 }
 div.sceditor-dropdown textarea {
     padding: 6px;
@@ -285,6 +297,7 @@ div.sceditor-dropdown .button {
     font-weight: bold;
 	display: block;
 	margin: auto;
+	width: auto;
     padding: 6px 12px;
     -moz-background-clip: padding;
     -moz-border-radius: 0px;
@@ -326,6 +339,7 @@ div.sceditor-emoticons, div.sceditor-more-emoticons {
 div.sceditor-grip {
     background-image: url('/themes/glav/images/sceditor.png');
     background-repeat: no-repeat;
+    background-position: -711px -15px;
     bottom: 0;
     cursor: pointer;
     height: 10px;
@@ -439,7 +453,7 @@ div.sceditor-video_wizard .video_data_block {/**/
 div.sceditor-video_wizard input {
 	margin: 0;
 }
-div.sceditor-video_wizard .drop_down_lock {
+.drop_down_lock {
 	display: none;
 	position: absolute;
 	width: 100%;
@@ -449,11 +463,11 @@ div.sceditor-video_wizard .drop_down_lock {
 	background-color: #fff;
 	opacity: 0.8;
 }
-div.sceditor-video_wizard .drop_down_lock .ajax_loader {
+.drop_down_lock .ajax_loader {
 	display: block;
 	height: 100%;
 	width: 100%;
-	background: url('/themes/glav/images/ajax-loader.gif') center center no-repeat;
+	background: url('/themes/glav/images/ajax-loader1.gif') center center no-repeat;
 }
 div.sceditor-video_wizard .title_footer {
 	position: absolute;
@@ -481,4 +495,27 @@ div.sceditor-specsymbols span.specsym {
 }
 div.sceditor-specsymbols span.specsym:hover {
 	background-color: #ddd;
+}
+#feedback {
+    font-size: 1.4em;
+}
+#image-loaded-list .ui-selecting {
+    background: #FECA40;
+}
+#image-loaded-list .ui-selected {
+    background: #00f;
+    color: white;
+}
+#image-loaded-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+#image-loaded-list li {
+    margin: 1px;
+    padding: 2px;
+    float: left;
+    width: 100px;
+    height: 80px;
+    text-align: center;
 }

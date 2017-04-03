@@ -29,20 +29,19 @@ twttr.ready(function (twttr) {
 // as loaded, but for each individual widget.
 	twttr.events.bind('rendered', function (event) {
 		if (event.target.classList.contains('twitter-tweet-error')) {
-			event.target.innerHTML = event.target.innerHTML + '<br /><span style="color: #a00000;">Ошибка загрузки твита.<br />Возможно твита с таким адресом не существует.</span>';
+			event.target.innerHTML = event.target.innerHTML + '<br /><span style="color: #a00000;">Ошибка загрузки твита.<br />Попробуйте обновить страницу или используйте ссылку на твит.</span>';
 		}
 		if (event.target.classList.contains('twitter-video-error')) {
-			event.target.innerHTML = event.target.innerHTML + '<br /><span style="color: #a00000;">Ошибка загрузки видео из твита.<br />Возможно твит не содержит видео.</span>';
+			event.target.innerHTML = event.target.innerHTML + '<br /><span style="color: #a00000;">Ошибка загрузки видео из твита.<br />Попробуйте обновить страницу или используйте ссылку на твит.</span>';
 		}
-		if( typeof $ === 'function' ){
+		if( typeof window.$ === 'function' ){
 			if( event.target.classList.contains('twitter-video') ){
 				$(event.target).closest(".cBlockTwitter").css({
+					'height': "auto",
 					'background-color': "transparent"
 				});
 			}else{
 				$(event.target).closest(".cBlockTwitter").css({
-					'width': "auto",
-					'height': "auto",
 					'background-color': "transparent"
 				});
 			}

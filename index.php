@@ -4,15 +4,18 @@
 <title>Прототип редактора ГА</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width" />
-<link href="https://glav.su/themes/glav/flex.css?t=1485603030" media="screen" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="jquery.js"></script>
+<link href="https://glav.su/themes/glav/flex.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/themes/glav/styles/zoombox.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/themes/glav/styles/sceditor.css" media="screen" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="jquery.3.1.1.min.js"></script>
+<script type="text/javascript" src="jquery.ui.1.12.1.min.js"></script>
 <script type="text/javascript" src="jquery.class.js"></script>
 <script type="text/javascript" src="jquery.sceditor.bbcode.1.5.2.js"></script>
 <script type="text/javascript" src="jquery.sceditor.ru.js.source"></script>
 <script type="text/javascript" src="default.bbcodeform.js"></script>
 <script type="text/javascript" src="default.bbcodeform.uploadimage.js"></script>
-<!--<script type="text/javascript" src="forum.messageform.bbcode.js"></script>-->
 <script type="text/javascript" src="forum.messageform.js"></script>
+<script type="text/javascript" src="forum.imgzoombox.js"></script>
 <script type="text/javascript" src="twitter.widjets.js"></script>
 <script type="text/javascript">
     //<![CDATA[
@@ -22,10 +25,11 @@
     //]]>
 </script>
 <script type="text/javascript">
-var gxhr;
+var gxhr, zbox;
 $(document).ready(function()
 {
     new Forum.MessageForm();
+    zbox = new Forum.ImgZoomBox();
     $('#jsParseButton').click(function()
     {
         var bbCode = $('#messageBBCodeForm textarea').sceditor('instance').val();
@@ -48,6 +52,12 @@ $(document).ready(function()
 		});
 
     });
+    // Затычка для upload-а картинок. Возвращает случайную из уже имеющихся на сервере.
+    $.ajaxUpload = function(setts){
+        setts['type'] = 'POST';
+        $.ajax(setts);
+        console.log(setts);
+    };
 //    var eD = $("#messageBBCodeForm").find("textarea").sceditor("instance");
 //    $("#messageFormContentFieldWidget").change(function(){
 //    	console.log($(this).val());
@@ -92,48 +102,106 @@ var init_funcs = function(){
 				});
 		}
 	});
-	
+
 	if( twttr && twttr.widgets ){
 		twttr.widgets.load();
 	}
+	
+    //new Forum.ImgZoomBox();
+    zbox.procImages();
 }
 </script>
+<style>
+* { border: 0; margin: 0; outline: 0; padding: 0; vertical-align: baseline; }
+body, input, option, select, textarea { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.25em; }
+table { border-collapse: collapse; border-spacing: 0px; }
+td { vertical-align: top; }
+.l { width: 100%; }
+.l-b { margin: 10px 15px; }
+.l-b a { color: #666; }
+.l-b li { color: #666; display: inline; font-size: 90%; margin-right: 5px; }
+.l-b ol { list-style-type: none; padding: 0px; }
+.l-c { margin: 0px auto; max-width: 1010px; width: 100%; width: expression(document.body.clientWidth > 1011 ? "1010px" : "100%"); }
+.l-f { margin: 0px 5px; padding: 20px 0px; }
+.l-f-b { background-color: #ccc; }
+.l-fm { margin: 0px 5px; padding: 10px 0px; }
+.l-fm-b { background-color: #eee; }
+.l-h { margin: 0px 5px; }
+.l-h-b { background-color: #147; color: #fff; height: 50px; }
+.l-mm-m-b { background-color: #036; height: 31px; }
+.l-mm-m table { border-top: 1px solid #036; height: 30px; margin: 0px 5px; }
+.l-mm-m a, .l-mm-m a:link, .l-mm-m a:visited { color: #fff; display: block; height: 30px; line-height: 30px; padding: 0px 10px; text-decoration: none; }
+a.l-mm-m-i:hover, a.l-mm-m-i-a, a.l-mm-m-i-a:link, a.l-mm-m-i-a:visited, a.l-mm-m-i-h:hover { background-color: #eee; color: #036; text-decoration: none; }
+a.l-mm-m-i-h { background-color: #c00; }
+a.l-mm-m-i-asm, a.l-mm-m-i-asm:visited { background-color: #eee; }
+.l-mm-sm a.l-mm-sm-i-a { font-weight: bold; }
+.l-mm-sm table { height: 30px; margin: 0px 15px; }
+.l-mm-sm td { padding-right: 10px; vertical-align: middle; }
+.l-mm-sm td:last-child { padding-right: 0px; }
+.l-mm-sm-b { background-color: #eee; height: 30px; }
+.l-mm-s { display: none; }
+.l-up { margin: 0px 5px; }
+.l-up-b { background-color: #000; color: #fff; height: 30px; }
+.l-h { display: none; }
+.l-h-b { height: auto; }
+.l-mm { display: none; }
+.l-mm table { border: 0px; height: auto; margin: 0px; }
+.l-mm tr.fRow { padding: 10px; }
+.l-mm td.fItem { width: 100%; }
+.l-mm a.l-mm-m-i-h { display: none; }
+.l-mm-b { height: auto; }
+.l-mm-s { align-items: center; background-color: #036; height: 44px; padding: 0px 10px; }
+.l-mm-s-b { border: 1px solid #003; margin-left: auto; }
+.l-mm-sm table { height: auto; }
+.l-mm-sm tr.fRow { align-items: center; padding: 10px; }
+.l-mm-sm td.fItem { margin-bottom: 5px; padding: 0px; width: 100%; }
+.l-mm-sm-b { height: auto; }
+.l-up { display: none; }
+.l-up-b { height: auto; }
+@media (min-width: 800px) {
+    .l-h { display: block; }
+    .l-h-b { height: 50px; }
+    .l-mm { display: block; }
+    .l-mm table { border-top: 1px solid #036; display: block; height: 30px; margin: 0px 5px; }
+    .l-mm tr.fRow { padding: 0px; }
+    .l-mm td.fItem { width: auto; }
+    .l-mm a.l-mm-m-i-h { display: block; }
+    .l-mm-b { height: 31px; }
+    .l-mm-s { display: none; }
+    .l-mm-sm table { height: 30px; margin: 0px 10px; }
+    .l-mm-sm tr.fRow { align-items: center; height: 30px; padding: 0px 5px; }
+    .l-mm-sm td.fItem { display: block; margin-right: 10px; padding: 0px; width: auto; }
+    .l-mm-sm td.fItem:last-child { margin-right: 0px; }
+    .l-mm-sm-b { height: 30px; }
+    .l-up { display: block; }
+    .l-up-b { height: 30px; }
+}
+@media (min-width: 1210px) {
+    .l-c { max-width: 1210px; width: expression(document.body.clientWidth > 1211 ? "1210px" : "100%"); }
+}
+</style>
 <style type="text/css">
 /*forum css*/
-ol {
-	padding-left: 20px;
+div.video-wrapper{
+    position: relative;
+    display: inline-block;
 }
-table.postTable td {
-	padding: 0 5px;
+div.video-player-play{
+    position: absolute;
+    background: url(/themes/glav/images/play.png) center center no-repeat;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    top: 0px;
 }
-hr {
-	margin: 7px 0;
-}
-.forumMessagesListMessageContent .cBlock {
-	word-wrap: break-word;
-}
-.cBlockQuote, cBlockSpoiler {
-	margin: 4px 0;
-	position: relative;
-}
-.cBlockTwitter {
-	display: block;
-	height: auto;
-	background-color: white;
-	border-radius: 4px;
-	border: 1px solid transparent;
-}
-.twitter-err-message {
-	color: #a00000;
-}
-.twitter-tweet, .twitter-video {
-	margin: 0;
-}
-.twitter-logo {
-	display: block;
-	width: 26px;
-	height: 26px;
-	background: url('/themes/glav/images/twitter-logo.png') 10px 10px no-repeat;
+span.video-sticker{
+    padding: 0 4px;
+    background-color: #fff;
+    border-radius: 5px 5px 0 0;
+    border: 1px solid #ccc;
+    color: #555;
+    border-bottom: none;
+    font-size: 12px;
 }
 /*end forum css*/
 
@@ -164,257 +232,210 @@ hr {
 
 <style type="text/css">
 /*sceditor.css*/
-.sceditor-button div {/**/
-    background-image: url('/themes/glav/images/sceditor2017-02-26.png');
-}
-.sceditor-button-qsplit div {/**/
-    background-position: -720px 0px;
-}
-.sceditor-button-twitter div {/**/
-    background-position: -768px 0px;
-}
-.sceditor-button-video div {/**/
-    background-position: -792px 0px;
-}
-.sceditor-button-specsymbol div {/**/
-    /*background-position: -792px 0px;*/
-    background-image: url(https://glav.su/files/messages/f2b0cbedeeafbe675883cd6a311c7c67.gif);
-}
-div.sceditor-dropdown label {/**/
-	display: inline;
-    font-weight: normal;
-    padding: 4px;
-}
-div.sceditor-dropdown .button {/**/
-	display: block;
-	margin: auto;
-}
-div.sceditor-video_wizard .video_data_block {/**/
-	display: inline-block;
-	max-width: 320px;
-	max-height: 60px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	padding: 5px 3px;
-	margin-bottom: 10px;
-}
-div.sceditor-video_wizard input {/**/
-	margin: 0;
-}
-div.sceditor-video_wizard .drop_down_lock {/**/
-	display: none;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	background-color: #fff;
-	opacity: 0.8;
-}
-div.sceditor-video_wizard .drop_down_lock .ajax_loader {/**/
-	display: block;
-	height: 100%;
-	width: 100%;
-	background: url('/themes/glav/images/ajax-loader.gif') center center no-repeat;
-}
-div.sceditor-video_wizard .title_footer {/**/
-	position: absolute;
-	bottom: 0px;
-	left: 0px;
-	width: 100%;
-	height: 30%;
-	background: linear-gradient(to top, #fff, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.0)) repeat scroll 0% 0% transparent;
-}
-div.sceditor-specsymbols span.specsym {
-	cursor: pointer;
-	display: inline-block;
-	border: 1px solid #eee;
-	padding: 5px;
-	background-color: #fff;
-	color: black;
-	font-size: 16px;
-	font-weight: bold;
-	width: 16px;
-	height: 16px;
-	text-align: center;
-	text-indent: 0px;
-	vertical-align: middle;
-	line-height: 1;
-}
-div.sceditor-specsymbols span.specsym:hover {
-	background-color: #ddd;
-}
+
 </style>
 </head>
 <body>
 
 <table class="l">
 <tr>
-<td class="lContentBackground">
-    <div class="lCenter">
-        <div class="lContent">
-
-<table style="width: 100%;">
-<tr>
-    <td style="vertical-align: top; width: 100%; text-align: center;">
-        <div id="messageBBCodeForm" class="bbCodeForm">
-            <textarea id="messageFormContentFieldWidget" name="content" style="height: 320px; display: none;"></textarea>
-        </div>
-        <input id="jsParseButton" type="button" value="Parse" class="cBlueButton" style="height: 26px; margin: 5px 0;" />
-    </td>
-</tr>
-</table>
-
-<div id="forumMessagesList" class="forumMessagesList">
-    <div id="forumMessagesListMessageXXX" class="forumMessagesListMessage">
-    <div class="forumMessagesListMessageBlock">
-        <table class="f" width="100%">
-        <tbody>
-        <tr class="fRow fRowJCSB">
-		<td id="forumMessagesListMessage4267592Author" class="fItem forumMessagesListMessageAuthor">
-            <div class="cBlock">
-            <table class="f">
-            <tbody>
-            <tr class="fRow">
-                <td class="fItem forumMessagesListMessageAuthorOffline" title="Не в сети">&nbsp;</td>
-                <td id="forumMessagesListMessage4267592AuthorName" class="fItem forumMessagesListMessageAuthorName">
-                	<a href="#" rel="nofollow"><b>user</b></a>
+<td>
+        <div class="l-c">
+<form id="forumMessageForm" method="post">
+            <table style="width: 100%;">
+            <tr>
+                <td style="vertical-align: top; width: 100%; text-align: center;">
+                    <div id="messageBBCodeForm" class="bbCodeForm">
+                        <textarea id="messageFormContentFieldWidget" name="content" style="height: 320px; display: none;"></textarea>
+                        <table class="defaultBBCodeFormUploadImageList" style="background-color: #eee; border: 1px solid #ccc; display: none;">
+                        </table>
+                        <table class="defaultBBCodeFormUploadImageForm f" style="margin-top: 5px;">
+                        <tr class="fRow">
+                            <td class="fItem"><b>Прикрепить изображение:</b></td>
+                            <td class="fItem">&nbsp;</td>
+                            <td class="fItem"><input class="defaultBBCodeFormUploadImageTypeUrl" type="radio" value="1" checked="checked" style="vertical-align: top;" /></td>
+                            <td class="fItem">&nbsp;</td>
+                            <td class="fItem"><label class="defaultBBCodeFormUploadImageTypeUrlLabel">Ссылка</label></td>
+                            <td class="fItem">&nbsp;</td>
+                            <td class="fItem"><input class="defaultBBCodeFormUploadImageTypeFile" type="radio" value="2" style="vertical-align: top;" /></td>
+                            <td class="fItem">&nbsp;</td>
+                            <td class="fItem"><label class="defaultBBCodeFormUploadImageTypeFileLabel">Файл</label></td>
+                            <td class="fItem">&nbsp;</td>
+                            <td class="fItem"><input class="defaultBBCodeFormUploadImageUrlInput" type="text" style="border: 1px solid #ccc;"/></td>
+                            <td class="fItem"><input class="defaultBBCodeFormUploadImageFileInput" type="file" name="image" /></td>
+                            <td class="fItem">&nbsp;</td>
+                            <td class="fItem">
+                                <div class="defaultBBCodeFormUploadImageUploadLoader" style="display: none;">
+                                    <table cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td width="20"><img src="/themes/glav/images/loading.gif" style="vertical-align: top;" /></td>
+                                        <td>Загружается...</td>
+                                    </tr>
+                                    </table>
+                                </div>
+                                <a class="defaultBBCodeFormUploadImageUploadButton blueButton" href="" onclick="return false;" style="width: 70px;">Загрузить</a>
+                            </td>
+                        </tr>
+                        </table>            
+                    </div>
                 </td>
-                <td class="fItem" style="margin-left: auto;">
-                    <table class="cButtonsPanel f">
+            </tr>
+            </table>
+</form>            
+<br />
+                    <input id="jsParseButton" type="button" value="Parse" class="cBlueButton" style="height: 26px; margin: 5px 0;" />
+            <div id="forumMessagesList" class="forumMessagesList ml">
+                <div id="forumMessagesListMessageXXX" class="forumMessagesListMessage">
+                <div class="forumMessagesListMessageBlock">
+                    <table class="f" width="100%">
                     <tbody>
-                    <tr class="fRow">
-                    	<td class="fItem forumMessagesListMessageAuthorInfoSwitch">
-                        	<span id="forumMessagesListMessageXXXAuthorInfoSwitchButton" class="cBlueButton forumMessagesListMessageAuthorInfoSwitchButton icoButton iconizeUserSwitchButton">
-                                    &nbsp;
-                            </span>
+                    <tr class="fRow fRowJCSB">
+            		<td id="forumMessagesListMessage4267592Author" class="fItem forumMessagesListMessageAuthor">
+                        <div class="cBlock">
+                        <table class="f">
+                        <tbody>
+                        <tr class="fRow">
+                            <td class="fItem forumMessagesListMessageAuthorOffline" title="Не в сети">&nbsp;</td>
+                            <td id="forumMessagesListMessage4267592AuthorName" class="fItem forumMessagesListMessageAuthorName">
+                            	<a href="#" rel="nofollow"><b>user</b></a>
+                            </td>
+                            <td class="fItem" style="margin-left: auto;">
+                                <table class="cButtonsPanel f">
+                                <tbody>
+                                <tr class="fRow">
+                                	<td class="fItem forumMessagesListMessageAuthorInfoSwitch">
+                                    	<span id="forumMessagesListMessageXXXAuthorInfoSwitchButton" class="cBlueButton forumMessagesListMessageAuthorInfoSwitchButton icoButton iconizeUserSwitchButton">
+                                                &nbsp;
+                                        </span>
+                                    </td>
+                                    <td class="fItem forumMessagesListMessageButtonsSwitch">
+                                    	<span id="forumMessagesListMessageXXXButtonsSwitchButton" class="cBlueButton forumMessagesListMessageButtonsSwitchButton icoButton iconizeMenuSwitchButton">
+                                                &nbsp;
+                                        </span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+                        </table>
+                        </div>
+                    </td>
+                    <td class="fSeparator">&nbsp;</td>
+                    <td id="forumMessagesListMessageXXXDate" class="fItem forumMessagesListMessageDate">
+            	        <div class="cBlock">
+            				<a href="#" id="messageXXX" rel="nofollow"><b>Сегодня</b> в 12:00</a>
+            	        </div>
+                    </td>
+                    <td class="fSeparator">&nbsp;</td>
+            		<td id="forumMessagesListMessageXXXButtons" class="fItem forumMessagesListMessageButtons">
+                        <div class="cBlock">
+                            <table class="cButtonsPanel f">
+                            <tbody>
+                            <tr class="fRow">
+                            	<td class="fItem"><a class="cBlueButton" href="#" rel="nofollow" title="Ответить на сообщение">ответить</a></td>
+                                <td class="fItem"><span id="forumMessagesListMessageXXXArchiveButton" class="cBlueButton forumMessagesListMessageArchiveButton icoButton icoArchiveButton" title="Сохранить в архив">&nbsp;</span></td>
+            					<td class="fItem"><span id="forumMessagesListMessageXXXComplainButton" class="forumMessagesListMessageComplainButton icoButton icoComplainButton cRedButton" title="Пожаловаться модератору">&nbsp;</span></td>
+                            </tr>
+                            </tbody>
+                            </table>
+                        </div>
+                    </td>
+                    </tr>
+                    </tbody>
+                    </table>
+                    
+                    <table class="f forumMessagesListMessageBody" width="100%">
+                    <tbody>
+                    <tr class="fRow fRowJCSB">
+                    	<td id="forumMessagesListMessageXXXAuthorInfo" class="fItem forumMessagesListMessageAuthorInfo">
+                        	<div class="cBlock">
+                            	<table>
+                                <tr>
+                                	<td style="width: 74px;">
+                                    	<img src="https://glav.su/themes/glav/images/img_avatar64.png" width="64" height="64" alt="vkbru" style="border: 1px solid #ccc;" />
+                                    </td>
+                                    <td>&nbsp;</td>
+                                    <td>
+                                    	<img src="https://glav.su/themes/glav/images/flags/russia.gif" width="27" height="14" alt="Россия" title="Россия" /><br />
+                                        <div style="overflow: hidden; width: 100px;">
+                                                                                        Москва<br />
+                                                                                </div>
+                                                                                                    32
+                                                                                года
+                                    </td>
+                                </tr>
+                                </table>
+                                <br />
+                                Карма: +0.00<br />
+                                Регистрация: 01.01.2011<br />
+                                Сообщений: 100<br />
+                                Читатели: 0<br />
+                                                                                                                                            			</div>
                         </td>
-                        <td class="fItem forumMessagesListMessageButtonsSwitch">
-                        	<span id="forumMessagesListMessageXXXButtonsSwitchButton" class="cBlueButton forumMessagesListMessageButtonsSwitchButton icoButton iconizeMenuSwitchButton">
-                                    &nbsp;
-                            </span>
+                        <td class="fSeparator">&nbsp;</td>
+                        <td id="forumMessagesListMessageXXXContent" class="fItem forumMessagesListMessageContent">
+            				<div id="postContent" class="cBlock">
+            <!--				<video>
+            	<source src="https://video.twimg.com/tweet_video/C6vGcCvWkAENGpF.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+            				</video>
+            <video poster="star.png" autoplay="autoplay" loop="loop" controls="controls" tabindex="0">
+            <video loop="loop" controls="controls" tabindex="0" width="500">
+            	<source src="https://video.twimg.com/tweet_video/C6gmqSMXEAI6iTa.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+            </video>
+            <video id="vid1" controls="controls" tabindex="0" width="500">
+            	<source src="https://video.twimg.com/ext_tw_video/846718503084183552/pu/pl/tewiCnELOkeD2xHo.m3u8" type='application/x-mpegURL"' />
+            </video>
+            -->
+            				</div>
                         </td>
                     </tr>
                     </tbody>
                     </table>
-                </td>
-            </tr>
-            </tbody>
-            </table>
-            </div>
-        </td>
-        <td class="fSeparator">&nbsp;</td>
-        <td id="forumMessagesListMessageXXXDate" class="fItem forumMessagesListMessageDate">
-	        <div class="cBlock">
-				<a href="#" id="messageXXX" rel="nofollow"><b>Сегодня</b> в 12:00</a>
-	        </div>
-        </td>
-        <td class="fSeparator">&nbsp;</td>
-		<td id="forumMessagesListMessageXXXButtons" class="fItem forumMessagesListMessageButtons">
-            <div class="cBlock">
-                <table class="cButtonsPanel f">
-                <tbody>
-                <tr class="fRow">
-                	<td class="fItem"><a class="cBlueButton" href="#" rel="nofollow" title="Ответить на сообщение">ответить</a></td>
-                    <td class="fItem"><span id="forumMessagesListMessageXXXArchiveButton" class="cBlueButton forumMessagesListMessageArchiveButton icoButton icoArchiveButton" title="Сохранить в архив">&nbsp;</span></td>
-					<td class="fItem"><span id="forumMessagesListMessageXXXComplainButton" class="forumMessagesListMessageComplainButton icoButton icoComplainButton cRedButton" title="Пожаловаться модератору">&nbsp;</span></td>
-                </tr>
-                </tbody>
-                </table>
-            </div>
-        </td>
-        </tr>
-        </tbody>
-        </table>
-        
-        <table class="f forumMessagesListMessageBody" width="100%">
-        <tbody>
-        <tr class="fRow fRowJCSB">
-        	<td id="forumMessagesListMessageXXXAuthorInfo" class="fItem forumMessagesListMessageAuthorInfo">
-            	<div class="cBlock">
-                	<table>
-                    <tr>
-                    	<td style="width: 74px;">
-                        	<img src="https://glav.su/themes/glav/images/img_avatar64.png" width="64" height="64" alt="vkbru" style="border: 1px solid #ccc;" />
+                    <table class="f" width="100%">
+                    <tbody>
+                    <tr class="fRow fRowJCSB">
+                    	<td id="forumMessagesListMessageXXXAuthorButtons" class="fItem forumMessagesListMessageAuthorButtons">
+                        <div class="cBlock">
+                        	<table class="cButtonsPanel f">
+                            <tbody>
+                            <tr class="fRow">
+                            	<td class="fItem">
+                                	<span id="forumMessagesListMessageXXXPersonalMessageButton" class="forumMessagesListMessagePersonalMessageButton" title="Отправить личное сообщение"><a class="icoButton icoPersonalMessageButton cWhiteButton" href="#" rel="nofollow">&nbsp;</a></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                            </table>
+                        </div>
                         </td>
-                        <td>&nbsp;</td>
-                        <td>
-                        	<img src="https://glav.su/themes/glav/images/flags/russia.gif" width="27" height="14" alt="Россия" title="Россия" /><br />
-                            <div style="overflow: hidden; width: 100px;">
-                                                                            Москва<br />
-                                                                    </div>
-                                                                                        32
-                                                                    года
+                        <td class="fSeparator">&nbsp;</td>
+                        <td class="fItem forumMessagesListMessageVoteSwitch">
+                        <div class="cBlock">
+                            <table>
+                            <tr>
+                                <td>
+            						<table id="forumMessagesListMessageXXXVote" class="forumMessagesListMessageVote">
+            						<tr>
+            						<td><span id="forumMessagesListMessageXXXXVoteInfoButton" class="forumMessagesListMessageVoteInfoButton cWhiteButton">+ 0.00 / 0</span></td>
+                					</tr>
+            						</table>            
+            					</td>
+                            </tr>
+                            </table>
+                        </div>
                         </td>
-                    </tr>
+                        <td class="fSeparator">&nbsp;</td>
+                        <td class="fItem forumMessagesListMessageShareSwitch">
+                        </td>
+                        </tr>
+                    </tbody>
                     </table>
-                    <br />
-                    Карма: +0.00<br />
-                    Регистрация: 01.01.2011<br />
-                    Сообщений: 100<br />
-                    Читатели: 0<br />
-                                                                                                                                			</div>
-            </td>
-            <td class="fSeparator">&nbsp;</td>
-            <td id="forumMessagesListMessageXXXContent" class="fItem forumMessagesListMessageContent">
-				<div id="postContent" class="cBlock">
-<!--				<video>
-	<source src="https://video.twimg.com/tweet_video/C6vGcCvWkAENGpF.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
-				</video>
-<video poster="star.png" autoplay="autoplay" loop="loop" controls="controls" tabindex="0">
-<video loop="loop" controls="controls" tabindex="0" width="500">
-	<source src="https://video.twimg.com/tweet_video/C6gmqSMXEAI6iTa.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
-</video>
--->
-				</div>
-            </td>
-        </tr>
-        </tbody>
-        </table>
-        <table class="f" width="100%">
-        <tbody>
-        <tr class="fRow fRowJCSB">
-        	<td id="forumMessagesListMessageXXXAuthorButtons" class="fItem forumMessagesListMessageAuthorButtons">
-            <div class="cBlock">
-            	<table class="cButtonsPanel f">
-                <tbody>
-                <tr class="fRow">
-                	<td class="fItem">
-                    	<span id="forumMessagesListMessageXXXPersonalMessageButton" class="forumMessagesListMessagePersonalMessageButton" title="Отправить личное сообщение"><a class="icoButton icoPersonalMessageButton cWhiteButton" href="#" rel="nofollow">&nbsp;</a></span>
-                    </td>
-                </tr>
-                </tbody>
-                </table>
+                </div>
+                </div>
             </div>
-            </td>
-            <td class="fSeparator">&nbsp;</td>
-            <td class="fItem forumMessagesListMessageVoteSwitch">
-            <div class="cBlock">
-                <table>
-                <tr>
-                    <td>
-						<table id="forumMessagesListMessageXXXVote" class="forumMessagesListMessageVote">
-						<tr>
-						<td><span id="forumMessagesListMessageXXXXVoteInfoButton" class="forumMessagesListMessageVoteInfoButton cWhiteButton">+ 0.00 / 0</span></td>
-    					</tr>
-						</table>            
-					</td>
-                </tr>
-                </table>
-            </div>
-            </td>
-            <td class="fSeparator">&nbsp;</td>
-            <td class="fItem forumMessagesListMessageShareSwitch">
-            </td>
-            </tr>
-        </tbody>
-        </table>
-    </div>
-    </div>
-</div>
 
         </div>
-    </div>
 </td>
 </tr>
 </table>
@@ -424,7 +445,12 @@ div.sceditor-specsymbols span.specsym:hover {
 [twitter width=300]https://twitter.com/AstronomyNow/status/836543223384399873[/twitter]<br />
 [twitter width=900 type=video]https://twitter.com/NASA/status/832607570107981824[/twitter]<br />
 https://www.facebook.com/likeWrld/videos/244707235937804/<br />
--->
 
+[img=600x406]https://glav.su/files/messages/2017/03/23/4326504_c1d4e85648714f243bd14f3f30e59018.jpg[/img]
+[img=300x198]https://scontent.xx.fbcdn.net/v/t1.0-9/17308766_1658415701129495_1094287122308594812_n.jpg?oh=6ff8e29c9c3fdead23b6bec0a513710b&oe=59269E48[/img]
+[img]http://heroicrelics.org/info/saturn-v/saturn-v-inboard-profiles/s-ic-inboard-profile-med.jpg[/img]
+[img=200x112]https://scontent-arn2-1.xx.fbcdn.net/v/t31.0-8/p960x960/17492394_428886714113369_599513088484696170_o.jpg?oh=3d154c41c8e03dc8c4e6996921811d03&oe=59680E4F[/img]
+[img]http://i.imgur.com/fdoVMVL.jpg[/img]
+-->
 </body>
 </html>

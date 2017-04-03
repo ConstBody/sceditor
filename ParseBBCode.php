@@ -523,7 +523,7 @@ class Forum_Api_ParseBBCode
                     'type' => array('optional' => true, 'match' => '(tweet|video)', 'value' => 'twitter-$1', 'default' => 'twitter-tweet'),
                     'hide_media' => array('optional' => true, 'match' => '(1|true)', 'value' => ' data-cards="hidden"'),
                 ),
-                'content' => '<div class="cBlockTwitter" style="width: {width}px;{height}"><blockquote class="{type}" data-lang="ru" data-width="{width}"{hide_media} data-conversation="none"><a href="$1"><span class="twitter-logo"></span></a></blockquote></div>',
+                'content' => '<div class="cBlockTwitter" style="width: {width}px;{height}"><blockquote class="{type}" data-lang="ru" data-width="{width}"{hide_media} data-conversation="none"><a href="$1"><span class="twitter-logo" style="display: inline-block;"></span>&nbsp;Ссылка на твит</a></blockquote></div>',
                 'isBlock' => true
             ),
         ),
@@ -603,7 +603,8 @@ class Forum_Api_ParseBBCode
                     'height' => array('optional' => true, 'match' => '(\d{1,3})', 'value' => '$1', 'default' => '270'),
                     'type' => array('match' => '(facebook)', 'value' => '$1-video'),
                 ),
-                'content' => '<iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe>',
+//                'content' => '<div class="video-wrapper"><iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe><div class="video-player-play" onclick="$(this).hide();"></div></div>',
+                'content' => '<div class="video-wrapper"><span style="display: block;"><span class="video-sticker">FB видео</span></span><iframe class="{type}" width="{width}" height="{height}" src="$1" frameborder="0" allowfullscreen></iframe></div>',
                 'isBlock' => true
             ),
             'video5' => array( // vimeo
@@ -782,7 +783,7 @@ class Forum_Api_ParseBBCode
                         	$pattern, 
                         	function ($matches){
                         		$link_url = ( preg_match('~^(http|https|ftp)://~i', $matches[0]) )? $matches[0] : 'http://'.$matches[0];
-                        		$link_name = ( strlen($matches[0]) > self::LONG_WORD_LENGTH )? substr( $matches[0], 0, self::LONG_WORD_LENGTH ).'…' : $matches[0]; 
+                        		$link_name = ( strlen($matches[0]) > self::LONG_WORD_LENGTH )? substr( $matches[0], 0, self::LONG_WORD_LENGTH - 20 ).'…'.substr( $matches[0], -10) : $matches[0]; 
                         		return '[url='.$link_url.']'.$link_name.'[/url]';
                         	}, 
                         	$data

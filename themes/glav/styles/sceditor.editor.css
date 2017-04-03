@@ -94,7 +94,7 @@ hr {
     position: relative;
 }
 .spoilerHeader {
-    cursor: pointer;
+    cursor: text;
 	padding-left: 22px;
 }
 .spoilerHeader:hover {
