@@ -112,6 +112,7 @@ $(document).ready(function()
                 'overflow': overflow
             });
             $("#IZB-zoom-input").val(isz.zoom + '%');
+            $("#IZB-zoom-select").val('none');
             // Img dragging on/off
             if( $("#IZB-img-container")[0].clientWidth < $("#IZB-img-container").width() 
                 || $("#IZB-img-container")[0].clientHeight < $("#IZB-img-container").height() ){
