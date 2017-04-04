@@ -1633,7 +1633,7 @@ $(document).ready(function()
                         $("#image-loaded-radio").hide();
                         $("#image-loaded-radio-label").hide();
                     }
-                    $("input[name=image_type").change(function(){
+                    $("input[name=image_type]").change(function(){
                         $(".image_params_block").hide();
                         $("#" + $("input[name=image_type]:checked").val() + '-block').show();
                     });
