@@ -16,7 +16,7 @@
 <script type="text/javascript" src="default.bbcodeform.uploadimage.js"></script>
 <script type="text/javascript" src="forum.messageform.js"></script>
 <script type="text/javascript" src="forum.imgzoombox.js"></script>
-<script type="text/javascript" src="twitter.widjets.js"></script>
+<script type="text/javascript" src="/javascripts/libs/twitter.widjets.js"></script>
 <script type="text/javascript">
     //<![CDATA[
     APP_URL = "http://sce.ru";

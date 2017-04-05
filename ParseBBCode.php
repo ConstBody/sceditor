@@ -385,7 +385,7 @@ class Forum_Api_ParseBBCode
                 'type' => self::TYPE_UNPARSED_ATTRIBUTES,
                 'parameters' => array(
                     'author' => array('match' => '([^<>]{1,192}?)'),
-                    'link' => array('match' => '(forum/[\d\w-]+/[\d\w-]+/(?:\d+-message/#message\d+|threads/\d+/#message\d+|message/\d+/#msg\d+))'),
+                    'link' => array('match' => '(forum/[\d\w-]+/[\d\w-]+/(?:\d+-message/#message\d+|threads/\d+/#message\d+|message/\d+/#msg\d+|messages/\d+/#message\d+))'),
                     'date' => array('match' => '(\d+)', 'validate' => 'date', 'validateParams' => array('d.m.Y H:i:s')),
                 ),
                 'before' => '<div class="cBlockQuote"><div class="cBlockQuoteHeader">Цитата: <a href="/{link}" rel="nofollow">{author} от {date}</a></div><div class="cBlockQuoteContent">',

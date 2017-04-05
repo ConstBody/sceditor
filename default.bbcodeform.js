@@ -1831,7 +1831,7 @@ $(document).ready(function()
             sceD.document = sceD.getBody()[0].ownerDocument;
                var script = sceD.document.createElement('script');  
             script.type = 'text/javascript';  
-            script.src = 'twitter.widjets.js';  
+            script.src = '/javascripts/libs/twitter.widjets.js';  
             $(sceD.document).find('head')[0].appendChild(script);
             sceD.bind('keypress', function(e){
                 var replace_list = [
