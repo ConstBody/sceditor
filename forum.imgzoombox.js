@@ -18,11 +18,13 @@ $(document).ready(function()
         showZoomBox: function(src){
             $("#zoom-box-img").attr('src', src);
             this.zoomBox.css( {width: "100%", height: "100%"} );
+            this.zoomBox.show();
             $("#IZB-zoom-box-tools").show();
             this.zoom('initial');
         },
         hideZoomBox: function(){
             this.zoomBox.css( {width: "0px", height: "0px"} );
+            this.zoomBox.hide();
             $("#IZB-zoom-box-tools").hide();
         },
         // is Not for Zoom?
@@ -137,7 +139,7 @@ $(document).ready(function()
                     var imgId = 'image' + mId + '_' + img_i++;
                     $(img).hover(
                         function(){
-                            if( !this.complete || widget.isNfZ(this) ) return;
+                            if( !this.complete || widget.isNfZ(this) || widget.imgButtons.captured ) return;
                             clearTimeout(widget.foutTimeout);
                             if ( widget.imgButtons.find("#IZB-zoomin").attr('imgId') == imgId && widget.imgButtons.is(":visible") ) return;
                             widget.imgButtons.hide();
@@ -218,7 +220,7 @@ $(document).ready(function()
                 isNaN( parseInt(zval) )? widget.zoom('same') : widget.zoom('zoomTo', parseInt(zval));
             });
             // Make widget
-            this.zoomBox = $('<div class="IZB-zoom-box">')
+            this.zoomBox = $('<div class="IZB-zoom-box" style="display: none;">')
                 .append(
                     // Tool panel
                     $('<div id="IZB-zoom-box-tools">')
