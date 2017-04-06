@@ -1443,13 +1443,13 @@ $(document).ready(function()
                                     ), 
                                 $('<div id="url-block" class="wizard_data_block image_params_block" style="display: block;">')
                                     .append(
-                                        ($inplink = $('<input type="text" id="image-link" style="width: 280px;" value="" />')),
+                                        ($inplink = $('<input type="text" id="image-url" style="width: 280px;" value="" />')),
                                         '<br /><input type="checkbox" id="load-image-chb" style="margin-left: 20px;" />',
                                         '<label class="inline" for="load-image-chb">Загрузить на сервер</label>'
                                     ),
                                 $('<div id="file-block" class="wizard_data_block image_params_block" style="display: none;">')
                                     .append(
-                                        ($inpfile = $('<input type="file" id="image-file" accept=".jpg, .jpeg, .png, .gif" style="width: 280px;" value="" />'))
+                                        ($inpfile = $('<input name="image" type="file" id="image-file" accept=".jpg, .jpeg, .png, .gif" style="width: 280px;" value="" />'))
                                     ),
                                 $('<div id="loaded-block" class="wizard_data_block image_params_block" style="display: none; width: 290px; height: 106px; overflow-x: auto;">')
                                     .append(
@@ -1645,7 +1645,7 @@ $(document).ready(function()
                         top: dd_top + 'px',
                         left: dd_left + 'px'
                     });
-                    $inplink.focus();
+                    setTimeout(function(){$inplink.focus()}, 300);
                 },
                 exec: function (caller) {
                     var editor = this;
