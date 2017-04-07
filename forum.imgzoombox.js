@@ -139,8 +139,8 @@ $(document).ready(function()
                     var imgId = 'image' + mId + '_' + img_i++;
                     $(img).hover(
                         function(){
-                            if( !this.complete || widget.isNfZ(this) || widget.imgButtons.captured ) return;
                             clearTimeout(widget.foutTimeout);
+                            if( !this.complete || widget.isNfZ(this) ) return;
                             if ( widget.imgButtons.find("#IZB-zoomin").attr('imgId') == imgId && widget.imgButtons.is(":visible") ) return;
                             widget.imgButtons.hide();
                             widget.imgButtons.find("#IZB-zoomin").attr('imgId', imgId);
@@ -154,8 +154,9 @@ $(document).ready(function()
                             widget.imgButtons.css({left: $(this).offset().left + 'px', top: $(this).offset().top + 'px' }).fadeIn();
                         },
                         function(){
+                            clearTimeout(widget.foutTimeout);
                             if( widget.imgButtons.captured ) return;
-                            widget.foutTimeout = setTimeout( function(){ widget.imgButtons.fadeOut(); }, 300);
+                            widget.foutTimeout = setTimeout( function(){ widget.imgButtons.fadeOut(); }, 30000);
                         }
                     );
                 });
