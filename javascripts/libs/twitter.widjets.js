@@ -42,6 +42,7 @@ twttr.ready(function (twttr) {
 				});
 			}else{
 				$(event.target).closest(".cBlockTwitter").css({
+					'height': "auto",
 					'background-color': "transparent"
 				});
 			}
