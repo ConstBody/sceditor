@@ -1828,63 +1828,65 @@ $(document).ready(function()
                 //emoticonsCompat: true
             });
             var sceD = this.editor.sceditor('instance');
-            sceD.document = sceD.getBody()[0].ownerDocument;
-               var script = sceD.document.createElement('script');  
-            script.type = 'text/javascript';  
-            script.src = '/javascripts/libs/twitter.widjets.js';  
-            $(sceD.document).find('head')[0].appendChild(script);
-            sceD.bind('keypress', function(e){
-                var replace_list = [
+            if (sceD.getBody) {
+                sceD.document = sceD.getBody()[0].ownerDocument;
+                var script = sceD.document.createElement('script');  
+                script.type = 'text/javascript';  
+                script.src = '/javascripts/libs/twitter.widjets.js';  
+                $(sceD.document).find('head')[0].appendChild(script);
+                sceD.bind('keypress', function(e){
+                    var replace_list = [
                         ['--', '–'],    // Двойной дефис на тире (ndash)
                         ['---', '—']    // Тройной дефис на длинное тире (mdash)
                     ], mdepth = 3;
-                e = e.originalEvent;
-                if( !e.altKey && !e.ctrlKey && e.which == 32 ){
-                    if( typeof $.sceditor.ie == 'undefined'){
-                        if( sceD.inSourceMode() === true ){
-                            var caret = sceD.sourceEditorCaret(),
+                    e = e.originalEvent;
+                    if( !e.altKey && !e.ctrlKey && e.which == 32 ){
+                        if( typeof $.sceditor.ie == 'undefined'){
+                            if( sceD.inSourceMode() === true ){
+                                var caret = sceD.sourceEditorCaret(),
                                 src_start = sceD.val().substr(0, caret.start),
                                 src_end = sceD.val().substr(caret.start), re;
-                            $.each(replace_list, function(idx, repl){
-                                if( src_start.match( re = new RegExp('\\s' + repl[0] + '$') ) ){
-                                    src_start = src_start.replace(re, ' ' + repl[1]);
-                                    sceD.val(src_start + src_end);
-                                    sceD.sourceEditorCaret( {start: (st = caret.start - repl[0].length + repl[1].length), end: st} );
-                                    return false;
-                                }
-                            });
-                        }else{
-                            sceD.getRangeHelper().replaceKeyword(
-                                replace_list, false, true, mdepth, true, String.fromCharCode(e.which)
-                            );
+                                $.each(replace_list, function(idx, repl){
+                                    if( src_start.match( re = new RegExp('\\s' + repl[0] + '$') ) ){
+                                        src_start = src_start.replace(re, ' ' + repl[1]);
+                                        sceD.val(src_start + src_end);
+                                        sceD.sourceEditorCaret( {start: (st = caret.start - repl[0].length + repl[1].length), end: st} );
+                                        return false;
+                                    }
+                                });
+                            }else{
+                                sceD.getRangeHelper().replaceKeyword(
+                                    replace_list, false, true, mdepth, true, String.fromCharCode(e.which)
+                                );
+                            }
                         }
                     }
-                }
-            }, false, false);
-            (function(){
-                $.each( {'ctrl+alt+-': '–', 'ctrl+shift+_': '—', 'ctrl+\'': '́'}, 
-                    function(shcat, str){
-                        sceD.addShortcut(shcat, function(){
-                            if( this.inSourceMode() === true ){
-                                this.insertText(str);
-                            }else{
-                                this.wysiwygEditorInsertHtml(str);
+                }, false, false);
+                (function(){
+                    $.each( {'ctrl+alt+-': '–', 'ctrl+shift+_': '—', 'ctrl+\'': '́'}, 
+                            function(shcat, str){
+                                sceD.addShortcut(shcat, function(){
+                                    if( this.inSourceMode() === true ){
+                                        this.insertText(str);
+                                    }else{
+                                        this.wysiwygEditorInsertHtml(str);
+                                    }
+                                });
                             }
-                        });
+                          );
+                })();
+                sceD.bind('focus', function(e){
+                    var win = sceD.document.defaultView || sceD.document.parentWindow;
+                    if( win && win.twttr && win.twttr.widgets ){
+                        win.twttr.widgets.load();
                     }
-                );
-            })();
-            sceD.bind('focus', function(e){
-                var win = sceD.document.defaultView || sceD.document.parentWindow;
-                if( win && win.twttr && win.twttr.widgets ){
-                    win.twttr.widgets.load();
-                }
-            }, false, true);
-            sceD.bind('blur', function(e){
-                sceD.getBody().find(".twitter-div").each(function(idx, tw_div){ 
-                    $(tw_div).attr('data-height', tw_div.clientHeight);
-                });
-            }, false, true);
+                }, false, true);
+                sceD.bind('blur', function(e){
+                    sceD.getBody().find(".twitter-div").each(function(idx, tw_div){ 
+                        $(tw_div).attr('data-height', tw_div.clientHeight);
+                    });
+                }, false, true);
+            }
         }
     });
 });
