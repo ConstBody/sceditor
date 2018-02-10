@@ -1165,9 +1165,9 @@ $(document).ready(function()
                         )
                         .append('<div id="dd_lock" class="drop_down_lock"><span class="ajax_loader"></span></div>');
                     editor.createDropDown(caller, 'video_wizard', $content);
-                    var dd_top = $("#messageBBCodeForm").offset().top * 1 + 40 * 1,
-                        dd_left = $("#messageBBCodeForm").offset().left * 1 + 
-                                $("#messageBBCodeForm")[0].clientWidth / 2 - 
+                    var dd_top = $(".bbCodeForm").offset().top * 1 + 40 * 1,
+                        dd_left = $(".bbCodeForm").offset().left * 1 + 
+                                $(".bbCodeForm")[0].clientWidth / 2 - 
                                 $(".sceditor-dropdown")[0].clientWidth / 2;
                     $(".sceditor-dropdown").css({
                         top: dd_top + 'px',
@@ -1637,9 +1637,9 @@ $(document).ready(function()
                         $(".image_params_block").hide();
                         $("#" + $("input[name=image_type]:checked").val() + '-block').show();
                     });
-                    var dd_top = $("#messageBBCodeForm").offset().top * 1 + 40 * 1,
-                        dd_left = $("#messageBBCodeForm").offset().left * 1 + 
-                                $("#messageBBCodeForm")[0].clientWidth / 2 - 
+                    var dd_top = $(".bbCodeForm").offset().top * 1 + 40 * 1,
+                        dd_left = $(".bbCodeForm").offset().left * 1 + 
+                                $(".bbCodeForm")[0].clientWidth / 2 - 
                                 $(".sceditor-dropdown")[0].clientWidth / 2;
                     $(".sceditor-dropdown").css({
                         top: dd_top + 'px',

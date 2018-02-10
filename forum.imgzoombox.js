@@ -16,20 +16,38 @@ $(document).ready(function()
             };
         },
         showZoomBox: function(src){
+            var widget = this, match,
+                afterImgLoad = function(img, success, error, cnt, nft){
+                    if( !img || --cnt < 0 ){
+                        if(typeof error === 'function') error();
+                        return;
+                    }
+                    if( nft && (img.complete || (img.naturalWidth && img.naturalWidth !== 0)) ){
+                        success();
+                    }else{
+                        setTimeout(function(){afterImgLoad(img, success, error, cnt, true)}, 100);
+                    }
+                };
+            if( (match = src.match(/\/\/pbs\.twimg\.com\/media\/([a-z0-9]+)\.(jpg|gif|png)(:[a-z]+)?/i)) && match[3] !== ':orig' ) 
+                src = `https://pbs.twimg.com/media/${match[1]}.${match[2]}:orig`;
             $("#zoom-box-img").attr('src', src);
-            this.zoomBox.css( {width: "100%", height: "100%"} );
-            this.zoomBox.show();
-            $("#IZB-zoom-box-tools").show();
-            this.zoom('initial');
+            afterImgLoad($("#zoom-box-img")[0], function(){
+                widget.zoomBox.css( {width: "100%", height: "100%"} );
+                widget.zoomBox.show();
+                $("#IZB-zoom-box-tools").show();
+                widget.zoom('initial');
+            }, 0, 100, false);
         },
         hideZoomBox: function(){
             this.zoomBox.css( {width: "0px", height: "0px"} );
             this.zoomBox.hide();
             $("#IZB-zoom-box-tools").hide();
+            $("#zoom-box-img").attr('src', '');
         },
         // is Not for Zoom?
         isNfZ: function(img){ 
             var isz = this.imgSize(img), MIN_IMAGE_SIZE = 100;
+            if( $(img).attr('src').match(/https:\/\/pbs\.twimg\.com\/media\//i) ) return false;
             return ( isz.natural.w == isz.rendered.w && isz.natural.h == isz.rendered.h ) || isz.natural.w < MIN_IMAGE_SIZE || isz.natural.h < MIN_IMAGE_SIZE;
         },
         // set new zoom
@@ -129,7 +147,7 @@ $(document).ready(function()
                 $("#zoom-box-img").removeClass("draggable");
             }
         },
-        // Provessing page images
+        // Processing page images
         doProcImages: function(){
             var widget = this;
             $(this.Class.messageClass).each(function(midx, mess){
@@ -155,8 +173,8 @@ $(document).ready(function()
                         },
                         function(){
                             clearTimeout(widget.foutTimeout);
-                            if( widget.imgButtons.captured ) return;
-                            widget.foutTimeout = setTimeout( function(){ widget.imgButtons.fadeOut(); }, 30000);
+                            if( widget.imgButtonsCaptured || widget.imgButtons.is(":hover") ) return;
+                            widget.foutTimeout = setTimeout( function(){ widget.imgButtons.fadeOut(); }, 3000);
                         }
                     );
                 });
@@ -164,7 +182,7 @@ $(document).ready(function()
         },
         init: function(){
             var widget = this;
-            this.draggable = this.dragging = false;
+            this.draggable = this.dragging = this.imgButtonsCaptured = false;
             this.drag = {};
             this.foutTimeout = null;
             // Zoom button on image corner
@@ -181,14 +199,13 @@ $(document).ready(function()
                     .hover(
                         function(){
                             clearTimeout(widget.foutTimeout);
-                            widget.imgButtons.captured = true; 
+                            widget.imgButtonsCaptured = true; 
                         }, 
                         function(){
-                            widget.imgButtons.captured = false;
+                            widget.imgButtonsCaptured = false;
                         }
                     )
                     .appendTo( $(document.body) );
-            this.imgButtons.captured = false;
             // zoomBox widget
             // First make zoom-select control
             var zoomSelContainer = '<div style="display: inline-block; float: left; margin-top: 4px; position: relative;">',
